@@ -1,6 +1,6 @@
 import { model, Schema } from "mongoose";
-import CoupleSchema from "./Couple.js";
-import PictureSchema from "./Picture.js";
+import { CoupleSchema } from "./Dancer.js";
+import { PictureSchema } from "./Picture.js";
 
 const DOCUMENT_NAME = "Choreo";
 const COLLECTION_NAME = "choreos";

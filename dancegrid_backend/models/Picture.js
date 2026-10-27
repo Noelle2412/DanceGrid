@@ -1,4 +1,5 @@
-import { model, Schema } from "mongoose";
+import { Schema } from "mongoose";
+import { DancerPositionSchema } from "./DancerPosition.js";
 
 export const PictureSchema = new Schema(
   {

@@ -38,6 +38,7 @@ export const updateChoreo = async (req, res, next) => {
       name,
       gridSize,
     });
+    res.status(200).json(updatedChoreo);
   } catch (error) {
     next(error);
   }
@@ -60,6 +61,7 @@ export const updateCouples = async (req, res, next) => {
       couples,
     });
     if (!updateChoreo) throw new ResponseError("Choreo not found", 404);
+    res.status(200).json(updatedChoreo);
   } catch (error) {
     next(error);
   }
@@ -67,11 +69,12 @@ export const updateCouples = async (req, res, next) => {
 
 export const updatePictures = async (req, res, next) => {
   try {
-    const picture = req.body({ pictures });
+    const pictures = req.body({ pictures });
     const updatedChoreo = await ChoreoModel.findByIdAndUpdate(req?.params?.id, {
       pictures,
     });
     if (!updateChoreo) throw new ResponseError("Choreo not found", 404);
+    res.status(200).json(updatedChoreo);
   } catch (error) {
     next(error);
   }
@@ -86,6 +89,7 @@ export const addSharedUser = async (req, res, next) => {
       throw new ResponseError("Choreo already shared with that user", 403);
     updatedChoreo.sharedWith.push(id);
     await updatedChoreo.save();
+    res.status(200).json(updatedChoreo);
   } catch (error) {
     next(error);
   }
@@ -101,6 +105,7 @@ export const removeSharedUser = async (req, res, next) => {
       throw new ResponseError("Choreo not shared with that user", 403);
     updatedChoreo.sharedWith.splice(index, 1);
     await updatedChoreo.save();
+    res.status(200).json(updatedChoreo);
   } catch (error) {
     next(error);
   }

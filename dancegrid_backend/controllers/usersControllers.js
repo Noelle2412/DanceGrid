@@ -15,9 +15,7 @@ export const getAllUsers = async (req, res, next) => {
 export const getUserById = async (req, res, next) => {
   try {
     const user = await UserModel.findById(req?.params?.id);
-    if (!user) {
-      throw new ResponseError("User does not exist", 404);
-    }
+    if (!user) throw new ResponseError("User does not exist", 404);
     res.status(200).json(user);
   } catch (error) {
     next(error);
@@ -45,10 +43,21 @@ export const deleteUser = async (req, res, next) => {
 export const getUsersChoreos = async (req, res, next) => {
   try {
     const user = await UserModel.findById(req?.params?.id);
-    if (!user) {
-      throw new ResponseError("User does not exist", 404);
-    }
+    if (!user) throw new ResponseError("User does not exist", 404);
     const choreos = await ChoreoModel.find({ owner: user._id });
+    res.status(200).json(choreos);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSharedWithChoreos = async (req, res, next) => {
+  try {
+    const user = await UserModel.findById(req?.params?.id);
+    if (!user) throw new ResponseError("User does not exist", 404);
+    const choreos = await ChoreoModel.find({
+      sharedWith: user._id,
+    });
     res.status(200).json(choreos);
   } catch (error) {
     next(error);

@@ -4,7 +4,8 @@ import {
   getUsersChoreos,
   getUserById,
   createUser,
-  deletedUser,
+  deleteUser,
+  getSharedWithChoreos,
 } from "../controllers/usersControllers.js";
 
 const router = Router();
@@ -12,6 +13,8 @@ const router = Router();
 router.get("/", getAllUsers);
 
 router.get("/:id/choreos", getUsersChoreos);
+
+router.get("/:id/shared_choreos", getSharedWithChoreos);
 
 router.get("/:id", getUserById);
 

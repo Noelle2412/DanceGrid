@@ -7,7 +7,7 @@ const promise = mongoose.connect(URI);
 
 promise
   .then(() => {
-    console.log("Initialized connection to ToDos Database");
+    console.log("Initialized connection to Database");
   })
   .catch((error) => {
     console.log("Connection with ToDos Database failed");
