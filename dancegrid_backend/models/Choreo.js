@@ -3,11 +3,12 @@ import { model, Schema } from "mongoose";
 const DOCUMENT_NAME = "Choreo";
 const COLLECTION_NAME = "choreos";
 
-const schema = new Schema(
+const ChoreoSchema = new Schema(
   {
     name: {
-      type: Schema.Types.String,
+      type: String,
       required: true,
+      trim: true,
     },
     owner: {
       type: Schema.Types.ObjectId,
@@ -15,25 +16,30 @@ const schema = new Schema(
       required: true,
     },
     gridSize: {
-      type: [Schema.Types.Double, Schema.Types.Double],
+      type: [Number],
       required: true,
+      validate: {
+        validator: (value) => value.length === 2,
+      },
     },
     dancers: {
-      number: {
-        type: Schema.Types.Int,
-        required: true,
-      },
-      role: {},
-    },
-    pictures: {
-      type: [{ type: Schema.Types.String, ref: "Picture" }],
-      required: false,
+      type: [DancerSchema],
       default: [],
     },
+
+    pictures: {
+      type: [PictureSchema],
+      default: [],
+    },
+
+    sharedWith: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
-  {
-    timestamps: true,
-  },
+  { timestamps: true },
 );
 
-export const TodoModel = model(DOCUMENT_NAME, schema, COLLECTION_NAME);
+export const ChoreoModel = model(DOCUMENT_NAME, ChoreoSchema, COLLECTION_NAME);

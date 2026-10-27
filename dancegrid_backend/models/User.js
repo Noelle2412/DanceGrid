@@ -3,7 +3,7 @@ import { model, Schema } from "mongoose";
 const DOCUMENT_NAME = "User";
 const COLLECTION_NAME = "users";
 
-const schema = new Schema(
+const UserSchema = new Schema(
   {
     username: {
       type: Schema.Types.String,
@@ -15,4 +15,4 @@ const schema = new Schema(
   },
 );
 
-export const UserModel = model(DOCUMENT_NAME, schema, COLLECTION_NAME);
+export const UserModel = model(DOCUMENT_NAME, UserSchema, COLLECTION_NAME);
