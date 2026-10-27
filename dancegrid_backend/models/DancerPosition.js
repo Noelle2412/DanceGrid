@@ -2,11 +2,16 @@ import { model, Schema } from "mongoose";
 
 export const DancerPositionSchema = new Schema(
   {
-    dancerNumber: {
+    coupleNumber: {
       type: Number,
       required: true,
       min: 1,
       validate: Number.isInteger,
+    },
+    role: {
+      type: String,
+      enum: ["leader", "follower"],
+      required: true,
     },
     x: {
       type: Number,

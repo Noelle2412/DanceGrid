@@ -14,6 +14,16 @@ export const PictureSchema = new Schema(
     coordinates: {
       type: [DancerPositionSchema],
       default: [],
+      validate: {
+        validator: function (coordinates) {
+          const keys = coordinates.map(
+            ({ coupleNumber, role }) => `${coupleNumber}:${role}`,
+          );
+
+          return new Set(keys).size === keys.length;
+        },
+        message: "A dancer can only appear once per picture.",
+      },
     },
     order: {
       type: Number,
