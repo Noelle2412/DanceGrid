@@ -1,6 +1,6 @@
 import { model, Schema } from "mongoose";
 
-export const DancerSchema = new Schema(
+export const CoupleSchema = new Schema(
   {
     number: {
       type: Number,
@@ -8,18 +8,27 @@ export const DancerSchema = new Schema(
       min: 1,
       validate: Number.isInteger,
     },
-    role: {
-      type: String,
-      enum: ["solo", "leader", "follower"],
+    leader: {
+      type: DancerSchema,
       required: true,
     },
+    follower: {
+      type: DancerSchema,
+      required: true,
+    },
+  },
+  { _id: false },
+);
+
+const DancerSchema = new Schema(
+  {
     design: {
       color: {
-        type: String,
+        type: Schema.Types.String,
         required: true,
       },
       shape: {
-        type: String,
+        type: Schema.Types.String,
         enum: ["circle", "square", "triangle"],
         default: "circle",
       },

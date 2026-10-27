@@ -1,27 +1,20 @@
 import { Router } from "express";
-import {
-  addTag,
-  createTodo,
-  deleteTodo,
-  getAllTodos,
-  getTodoById,
-  removeTag,
-  updateTodo,
-} from "../controllers/todosControllers.js";
+import {} from "../controllers/choreosController.js";
 
 const router = Router();
 
-router.get("/", getAllTodos);
+router.get("/:id", getChoreoById);
+router.post("/", createChoreo);
+router.patch("/:id", updateChoreo);
+router.delete("/:id", deleteChoreo);
 
-router.get("/:id", getTodoById);
+router.patch("/update_dancers/:id", updateCouples);
 
-router.post("/", createTodo);
+router.post("/add_picture/:id", addPicture);
+router.patch("/update_picture/:id", updatePicture);
+router.delete("/remove_picture/:id", removePicture);
 
-router.patch("/add_tag/:id", addTag);
-router.patch("/remove_tag/:id", removeTag);
-
-router.patch("/:id", updateTodo);
-
-router.delete("/:id", deleteTodo);
+router.post("/add_shared_user/:id", addSharedUser);
+router.delete("/remove_shared_user/:id", removeSharedUser);
 
 export default router;
