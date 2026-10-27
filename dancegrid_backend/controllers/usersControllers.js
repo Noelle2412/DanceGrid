@@ -1,6 +1,6 @@
 import ResponseError from "../utils/ResponseError.js";
 import { UserModel } from "../models/User.js";
-import { TodoModel } from "../models/Todo.js";
+import { TodoModel } from "../models/Choreo.js";
 
 // Add more filters
 export const getAllUsers = async (req, res, next) => {
@@ -24,7 +24,25 @@ export const getUserById = async (req, res, next) => {
   }
 };
 
-export const getUsersToDos = async (req, res, next) => {
+export const createUser = async (req, res, next) => {
+  try {
+    const { username } = req.body;
+    const newUser = await UserModel.create({
+      username,
+    });
+    res.status(201).json(newUser);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteUser = async (req, res, next) => {
+  const deletedUser = await UserModel.findByIdAndDelete(req.params.id);
+  //Delete all the choreos the user owned
+  res.status(204).json(deletedUser);
+};
+
+export const getUsersChoreos = async (req, res, next) => {
   try {
     const user = await UserModel.findById(req?.params?.id);
     if (!user) {
@@ -38,36 +56,4 @@ export const getUsersToDos = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
-
-export const createUser = async (req, res, next) => {
-  try {
-    const { name, email, age } = req.body;
-    const newUser = await UserModel.create({
-      name,
-      email,
-      age,
-    });
-    res.status(201).json(newUser);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const updateUser = async (req, res, next) => {
-  const { name, email, age } = req.body;
-  if (!name && !email && !age) {
-    throw new ResponseError("Provide at least one argument to update", 403);
-  }
-  const updatedUser = await UserModel.findByIdAndUpdate(req.params.id, {
-    name,
-    email,
-    age,
-  });
-  res.status(204).json(updatedUser);
-};
-
-export const deleteUser = async (req, res, next) => {
-  const deletedUser = await UserModel.findByIdAndDelete(req.params.id);
-  res.status(204).json(deletedUser);
 };

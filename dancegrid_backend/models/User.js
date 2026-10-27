@@ -5,17 +5,9 @@ const COLLECTION_NAME = "users";
 
 const schema = new Schema(
   {
-    name: {
+    username: {
       type: Schema.Types.String,
       required: true,
-    },
-    email: {
-      type: Schema.Types.String,
-      required: true,
-    },
-    age: {
-      type: Schema.Types.Number,
-      required: false,
     },
   },
   {
