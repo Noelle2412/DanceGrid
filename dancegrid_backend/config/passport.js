@@ -39,16 +39,17 @@ passport.use(
     async (email, password, done) => {
       try {
         const user = await UserModel.findOne({
-          email: email.trim(),
+          email: email.toLowerCase().trim(),
         });
-        if (!user) return done(null, false, { message: "User does not exist" });
+        if (!user) return done(null, false, { message: "Invalid Credentials" });
         if (!user.password)
           return done(null, false, {
-            message: "User does not have a pwd saved",
+            message: "Invalid Credentials",
           });
 
         const matched = await validatePassword(password, user.password);
-        if (!matched) return done(null, false, { message: "wrong pwd" });
+        if (!matched)
+          return done(null, false, { message: "Invalid Credentials" });
 
         return done(null, user);
       } catch (error) {

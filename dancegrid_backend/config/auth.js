@@ -51,12 +51,15 @@ export function publicUser(user) {
 export async function register(req, res, next) {
   try {
     const { email, password } = req.body;
-    const user = await UserModel.findOne({ email });
+    const user = await UserModel.findOne({ email: email.toLowerCase().trim() });
     if (user) {
       throw new ResponseError("This email is already registered", 400);
     }
     const hashedPassword = await createPassword(password);
-    const newUser = { email, password: hashedPassword };
+    const newUser = {
+      email: email.toLowerCase().trim(),
+      password: hashedPassword,
+    };
     await UserModel.create(newUser);
     setAuthCookie(res, newUser);
     res.status(201).json({
@@ -72,7 +75,9 @@ export async function login(req, res, next) {
   passport.authenticate("local", { session: false }, (error, user, info) => {
     if (error) return next(error);
     if (!user)
-      return next(new ResponseError(info?.message || "Invalid User", 400));
+      return next(
+        new ResponseError(info?.message || "Invalid Credentials", 400),
+      );
     setAuthCookie(res, user);
     res
       .status(200)
