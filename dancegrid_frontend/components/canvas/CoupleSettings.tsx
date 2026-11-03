@@ -1,9 +1,18 @@
 import useDancers from "@/stores/useDancers";
 import useChoreoSettings from "@/stores/useChoreoSettings";
+import { Input } from "../ui/input";
 
 const CoupleSettings = () => {
   const { settings } = useChoreoSettings();
-  const { couples, addCouple, deleteCouple, updateDancer } = useDancers();
+  const {
+    couples,
+    addCouple,
+    deleteCouple,
+    updateDancer,
+    generateNumber,
+    validateNumbers,
+    updateCouple,
+  } = useDancers();
 
   return (
     <div>
@@ -15,26 +24,75 @@ const CoupleSettings = () => {
         ) : (
           <thead>
             <tr>
-              <td className="m-4"></td>
-              <td className="text-lg m-4">Leaders</td>
-              <td className="text-lg m-4">Followers</td>
+              <td className="px-4 py-2"> </td>
+              <td className="text-lg px-4 py-2">Leaders</td>
+              <td className="text-lg px-4 py-2">Followers</td>
             </tr>
           </thead>
         )}
         <tbody>
           {couples.map((couple: any) => (
             <tr>
-              <td>{couple.number}: </td>
-              <td>
-                {couple.leader.name}, {couple.leader.color},
-                {couple.leader.shape}
+              <td className="px-4 py-2">
+                {" "}
+                <Input
+                  className="w-12"
+                  name="couple_number"
+                  inputMode="numeric"
+                  min={0}
+                  max={100}
+                  placeholder="#"
+                  defaultValue={couple.number}
+                  onChange={(e) => {
+                    try {
+                      updateCouple(couple.number, Number(e.target.value));
+                    } catch (error) {
+                      alert(error);
+                      e.target.value = couple.number;
+                    }
+                  }}
+                />{" "}
+              </td>
+              <td className="px-4 py-2">
+                <Input
+                  className="w-32"
+                  name="leader_name"
+                  type="text"
+                  placeholder="Leader Name"
+                  defaultValue={couple.leader.name}
+                  onChange={(e) => {
+                    updateDancer(
+                      couple.number,
+                      "leader",
+                      e.target.value,
+                      couple.leader.color,
+                      couple.leader.shape,
+                    );
+                  }}
+                />{" "}
+                {couple.leader.color},{couple.leader.shape}
               </td>
               {settings.soloMode ? (
                 ""
               ) : (
-                <td>
-                  {couple.follower.name}, {couple.follower.color},
-                  {couple.follower.shape}
+                <td className="px-4 py-2">
+                  <Input
+                    className="w-32"
+                    name="follower_name"
+                    type="text"
+                    placeholder="Follower Name"
+                    defaultValue={couple.follower.name}
+                    onChange={(e) => {
+                      updateDancer(
+                        couple.number,
+                        "follower",
+                        e.target.value,
+                        couple.follower.color,
+                        couple.follower.shape,
+                      );
+                    }}
+                  />{" "}
+                  {couple.follower.color},{couple.follower.shape}
                 </td>
               )}
             </tr>
@@ -54,7 +112,7 @@ const CoupleSettings = () => {
             color: "#000000",
             name: "Name",
           };
-          addCouple(couples.length + 1, leader, follower);
+          addCouple(generateNumber(couples), leader, follower);
         }}>
         + Add Dancers
       </button>

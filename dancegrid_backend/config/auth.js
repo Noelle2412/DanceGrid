@@ -60,11 +60,11 @@ export async function register(req, res, next) {
       email: email.toLowerCase().trim(),
       password: hashedPassword,
     };
-    await UserModel.create(newUser);
-    setAuthCookie(res, newUser);
+    const createdUser = await UserModel.create(newUser);
+    setAuthCookie(res, createdUser);
     res.status(201).json({
       message: "User created successfully!",
-      user: publicUser(newUser),
+      user: publicUser(createdUser),
     });
   } catch (error) {
     next(error);
