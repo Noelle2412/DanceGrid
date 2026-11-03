@@ -1,5 +1,8 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import ResponseError from "../utils/ResponseError.js";
+import { UserModel } from "../models/User.js";
+import passport from "passport";
 
 export async function createPassword(password) {
   const salt = await bcrypt.genSalt(10);
@@ -69,12 +72,21 @@ export async function login(req, res, next) {
   passport.authenticate("local", { session: false }, (error, user, info) => {
     if (error) return next(error);
     if (!user)
-      return next(
-        new ResponseError(info?.message || "Invalid Credentials", 400),
-      );
+      return next(new ResponseError(info?.message || "Invalid User", 400));
     setAuthCookie(res, user);
     res
       .status(200)
       .json({ message: "Login successful", user: publicUser(user) });
   })(req, res, next);
+}
+
+export async function logout(req, res, next) {
+  try {
+    clearAuthCookie(res);
+    res.status(200).json({
+      message: "Logout successful",
+    });
+  } catch (error) {
+    next(error);
+  }
 }

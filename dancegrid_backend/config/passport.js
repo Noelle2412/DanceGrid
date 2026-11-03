@@ -28,8 +28,6 @@ async function findOrCreateOAuthUser({
 
   return await UserModel.create({
     email,
-    name,
-    avatar,
     provider: "google",
     [idField]: providerId,
   });
@@ -41,14 +39,16 @@ passport.use(
     async (email, password, done) => {
       try {
         const user = await UserModel.findOne({
-          email: email.toLowerCase().trim(),
+          email: email.trim(),
         });
-        if (!user || !user.password)
-          return done(null, false, { message: "Invalid Credentials" });
+        if (!user) return done(null, false, { message: "User does not exist" });
+        if (!user.password)
+          return done(null, false, {
+            message: "User does not have a pwd saved",
+          });
 
         const matched = await validatePassword(password, user.password);
-        if (!matched)
-          return done(null, false, { message: "Invalid Credentials" });
+        if (!matched) return done(null, false, { message: "wrong pwd" });
 
         return done(null, user);
       } catch (error) {

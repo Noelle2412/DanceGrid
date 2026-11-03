@@ -26,11 +26,6 @@ const UserSchema = new Schema(
       unique: true,
       sparse: true,
     },
-    githubId: {
-      type: Schema.Types.String,
-      unique: true,
-      sparse: true,
-    },
   },
   {
     timestamps: true,

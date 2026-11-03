@@ -3,27 +3,28 @@ import {
   getAllUsers,
   getUsersChoreos,
   getUserById,
-  createUser,
   deleteUser,
   getSharedWithChoreos,
+  registerUser,
+  loginUser,
+  logoutUser,
 } from "../controllers/usersControllers.js";
-import { register, login } from "../config/auth.js";
 
 const router = Router();
 
 router.get("/", getAllUsers);
 
-router.post("/register", register);
+router.post("/register", registerUser);
 
-router.post("/login", login);
+router.post("/login", loginUser);
+
+router.post("/:id/logout", logoutUser);
 
 router.get("/:id/choreos", getUsersChoreos);
 
 router.get("/:id/shared_choreos", getSharedWithChoreos);
 
 router.get("/:id", getUserById);
-
-router.post("/", createUser);
 
 router.delete("/:id", deleteUser);
 

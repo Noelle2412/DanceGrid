@@ -1,8 +1,8 @@
 import ResponseError from "../utils/ResponseError.js";
 import { UserModel } from "../models/User.js";
 import { ChoreoModel } from "../models/Choreo.js";
+import { register, login, logout } from "../config/auth.js";
 
-//Incomplete!!
 export const getAllUsers = async (req, res, next) => {
   try {
     const users = await UserModel.find();
@@ -12,23 +12,17 @@ export const getAllUsers = async (req, res, next) => {
   }
 };
 
+export const registerUser = register;
+
+export const loginUser = login;
+
+export const logoutUser = logout;
+
 export const getUserById = async (req, res, next) => {
   try {
     const user = await UserModel.findById(req?.params?.id);
     if (!user) throw new ResponseError("User does not exist", 404);
     res.status(200).json(user);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const createUser = async (req, res, next) => {
-  try {
-    const { username } = req.body;
-    const newUser = await UserModel.create({
-      username,
-    });
-    res.status(201).json(newUser);
   } catch (error) {
     next(error);
   }

@@ -19,13 +19,13 @@ router.post("/", requireAuth, createChoreo);
 router.patch("/:id", requireAuth, updateChoreo);
 router.delete("/:id", requireAuth, deleteChoreo);
 
-router.patch("/update_dancers/:id", requireAuth, updateCouples);
+router.patch("/:id/update_dancers", requireAuth, updateCouples);
 
-router.patch("/update_picture/:id", requireAuth, updatePictures);
+router.patch("/:id/update_pictures", requireAuth, updatePictures);
 
-router.post("/add_shared_user/:id", requireAuth, addSharedUser);
-router.delete("/remove_shared_user/:id", requireAuth, removeSharedUser);
+router.patch("/:id/add_shared_user", requireAuth, addSharedUser);
+router.patch("/:id/remove_shared_user", requireAuth, removeSharedUser);
 
-router.delete("/remove_access/.id", requireAuth, removeAccessToChoreo);
+router.patch("/:id/remove_access", requireAuth, removeAccessToChoreo);
 
 export default router;

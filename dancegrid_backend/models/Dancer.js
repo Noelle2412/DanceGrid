@@ -12,6 +12,10 @@ const DancerSchema = new Schema(
         enum: ["circle", "square", "triangle"],
         default: "circle",
       },
+      name: {
+        type: Schema.Types.String,
+        default: "",
+      },
     },
   },
   { _id: false },

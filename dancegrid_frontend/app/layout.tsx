@@ -1,0 +1,49 @@
+import type { Metadata } from "next";
+import { Tomorrow, Lato, Geist } from "next/font/google";
+import { ThemeProvider } from "next-themes";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import "./globals.css";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+
+const tomorrow = Tomorrow({
+  weight: "500",
+  variable: "--font-tomorrow",
+});
+
+const lato = Lato({ weight: "400", variable: "--font-lato" });
+
+export const metadata: Metadata = {
+  title: "DanceGrid",
+  description: "Generate Choreography Pictures for Formation Dancing",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={cn(
+        "h-full",
+        "antialiased",
+        tomorrow.variable,
+        lato.variable,
+        "font-sans",
+        geist.variable,
+      )}>
+      <body className="min-h-full flex flex-col">
+        <ThemeProvider attribute="class">
+          <Navbar />
+          <main className="bg-bg p-4">{children}</main>
+          <Footer />
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}
