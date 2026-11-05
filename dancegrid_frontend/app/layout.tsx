@@ -37,10 +37,10 @@ export default function RootLayout({
         "font-sans",
         geist.variable,
       )}>
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-screen flex flex-col">
         <ThemeProvider attribute="class">
           <Navbar />
-          <main className="bg-bg p-4">{children}</main>
+          <main className="bg-bg p-4 grow">{children}</main>
           <Footer />
         </ThemeProvider>
       </body>

@@ -3,13 +3,18 @@ import { DancerPositionSchema } from "./DancerPosition.js";
 
 export const PictureSchema = new Schema(
   {
+    id: {
+      type: Schema.Types.String,
+      required: true,
+      unique: true,
+    },
     title: {
-      type: String,
+      type: Schema.Types.String,
       required: true,
       trim: true,
     },
     comment: {
-      type: String,
+      type: Schema.Types.String,
       default: "",
     },
     coordinates: {

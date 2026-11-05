@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
 import usersRouters from "./routers/usersRouters.js";
+import choreosRouters from "./routers/choreosRouters.js";
 import errorHandler from "./middlewares/errorHandler.js";
 import _uri from "./db/db.js";
 import cookieParser from "cookie-parser";
@@ -19,6 +20,8 @@ app.get("/", (req, res, next) => {
 });
 
 app.use("/users", usersRouters);
+
+app.use("/choreos", choreosRouters);
 
 app.use(errorHandler);
 

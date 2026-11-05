@@ -1,69 +1,70 @@
 import { create } from "zustand";
+
 const useDancers = create((set) => ({
   couples: [],
 
   updateCouple: (number, newNumber) => {
     set((state) => {
-      if (state.couples.find((c) => c.number == newNumber)) {
+      // If number hasn't changed, do nothing
+      if (number === newNumber) {
+        return state;
+      }
+      if (state.couples.some((c) => c.number === newNumber)) {
         throw new Error(`Couple / dancer number ${newNumber} already exists.`);
       }
-      const couples = state.couples.map((c) => {
-        if (c.number == number) {
-          c.number = newNumber;
-        }
-        return c;
-      });
-      return couples;
+      return {
+        couples: state.couples.map((c) =>
+          c.number === number ? { ...c, number: newNumber } : c,
+        ),
+      };
     });
   },
 
   updateDancer: (number, role, name, color, shape) => {
-    set((state) => {
-      const couples = state.couples.map((c) => {
+    set((state) => ({
+      couples: state.couples.map((c) => {
         if (c.number === number) {
-          if (role === "leader") {
-            c.leader.name = name;
-            c.leader.shape = shape;
-            c.leader.color = color;
-          } else {
-            c.follower.name = name;
-            c.follower.shape = shape;
-            c.follower.color = color;
-          }
+          return {
+            ...c,
+            [role]: {
+              ...c[role],
+              name: name !== undefined ? name : c[role].name,
+              color: color !== undefined ? color : c[role].color,
+              shape: shape !== undefined ? shape : c[role].shape,
+            },
+          };
         }
-      });
-      return couples;
-    });
+        return c;
+      }),
+    }));
   },
+
   addCouple: (number, leader, follower) => {
-    set((state) => {
-      state.couples.push({
-        number: number,
-        leader: leader,
-        follower: follower,
-      });
-      return state.couples;
-    });
+    set((state) => ({
+      couples: [
+        ...state.couples,
+        {
+          number: number,
+          leader: leader,
+          follower: follower,
+        },
+      ],
+    }));
   },
+
   deleteCouple: (number) => {
-    set((state) => {
-      let couple = state.couples.find((c) => c.number == number);
-      state.couples.pop(couple);
-      return state.couples;
-    });
+    set((state) => ({
+      couples: state.couples.filter((c) => c.number !== number),
+    }));
   },
+
   generateNumber: (couples) => {
     for (let i = 0; i < couples.length; i++) {
-      if (!couples.find((c) => c.number == i)) {
+      if (!couples.some((c) => c.number === i)) {
         return i;
       }
     }
     return couples.length;
-  },
-  validateNumbers: (couples) => {
-    let numbers = couples.map((c) => c.number);
-    let uniqueNumbers = new Set(numbers);
-    return numbers.length === uniqueNumbers.size;
   },
 }));
 
