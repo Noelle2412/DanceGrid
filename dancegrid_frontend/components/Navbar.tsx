@@ -23,7 +23,7 @@ const Navbar = () => {
         <Link href="/register">Sign Up</Link>
       </nav>
       <button
-        className="bg-secondary text-white p-2 rounded-lg"
+        className="bg-secondary text-white p-2 rounded-lg cursor-pointer"
         onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}>
         {!mounted
           ? "Toggle Theme"

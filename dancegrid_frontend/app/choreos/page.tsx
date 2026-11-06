@@ -10,7 +10,7 @@ const NewChoreoPage = () => {
     <div>
       <ChoreoSettings />
       <PicturesOverview />
-      {pictures.length > 0 && <Picture />}
+      {pictures.length > 0 && <Picture pictureId={pictures[0].id} />}
     </div>
   );
 };

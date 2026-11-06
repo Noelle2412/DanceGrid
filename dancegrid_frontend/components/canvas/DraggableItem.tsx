@@ -17,7 +17,7 @@ const clamp = (v: number, min: number, max: number) =>
  * Falls back to black if the color can't be parsed.
  */
 export function getContrastTextColor(hex: string): "#000000" | "#ffffff" {
-  const match = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(hex.trim());
+  const match = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(hex?.trim() || "");
   if (!match) return "#000000";
   let h = match[1];
   if (h.length === 3)
@@ -30,7 +30,6 @@ export function getContrastTextColor(hex: string): "#000000" | "#ffffff" {
     return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
   });
   const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  // 0.179 is the point where black and white text have equal contrast.
   return luminance > 0.179 ? "#000000" : "#ffffff";
 }
 
@@ -41,6 +40,8 @@ export interface DraggableItemProps {
   sizeMeters: number;
   /** Label shown in the middle of the item, e.g. the couple number */
   number?: number | string;
+  /** Position in meters from the center origin */
+  position?: { x: number; y: number };
   /** Called once when a drag ends, with the new position in meters (snapped). */
   onMove: (pos: { x: number; y: number }) => void;
 }
@@ -50,6 +51,7 @@ export function DraggableItem({
   pixelsPerMeter,
   sizeMeters,
   number,
+  position = { x: 0, y: 0 },
   onMove,
 }: DraggableItemProps) {
   const { settings } = useChoreoSettings();
@@ -106,10 +108,11 @@ export function DraggableItem({
       case "triangle":
         return <RegularPolygon {...shapeProps} sides={3} radius={radius} />;
       case "diamond":
-        // A 4-sided regular polygon has a vertex pointing up, i.e. a diamond.
         return <RegularPolygon {...shapeProps} sides={4} radius={radius} />;
       case "pentagon":
         return <RegularPolygon {...shapeProps} sides={5} radius={radius} />;
+      default:
+        return <Circle {...shapeProps} radius={radius} />;
     }
   };
 
@@ -121,8 +124,8 @@ export function DraggableItem({
   // The rendered position is NOT snapped: whatever the store says is drawn exactly.
   return (
     <Group
-      x={4 * pixelsPerMeter} //grab coordinate here!
-      y={-3 * pixelsPerMeter} //grab coordinate here!
+      x={position.x * pixelsPerMeter}
+      y={position.y * pixelsPerMeter}
       draggable
       onDragMove={handleDragMove}
       onDragEnd={handleDragEnd}
