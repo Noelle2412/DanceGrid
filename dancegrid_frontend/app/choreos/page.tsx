@@ -8,7 +8,7 @@ import Picture from "../../components/canvas/Picture";
 const NewChoreoPage = () => {
   const { pictures } = usePictures();
   const [selectedPictureId, setSelectedPictureId] = useState<string | null>(
-    pictures.length > 0 ? pictures[0].id : null
+    pictures.length > 0 ? pictures[0].id : null,
   );
 
   // If a picture is added and none is selected, or if current selection was deleted

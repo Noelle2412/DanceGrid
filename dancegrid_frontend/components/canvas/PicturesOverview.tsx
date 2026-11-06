@@ -53,7 +53,7 @@ const PicturesOverview = ({
               <div
                 key={picture.id}
                 onClick={() => onSelectPicture(picture.id)}
-                className={`flex flex-col justify-between items-center flex-shrink-0 w-28 h-28 p-2 rounded-lg cursor-pointer transition-all border-2 select-none ${
+                className={`flex flex-col justify-between items-center shrink-0 w-28 h-28 p-2 rounded-lg cursor-pointer transition-all border-2 select-none ${
                   isSelected
                     ? "border-accent bg-accent/15 shadow-md scale-105"
                     : "border-border bg-card hover:border-accent/60 hover:bg-accent/5"
@@ -61,7 +61,7 @@ const PicturesOverview = ({
                 <span className="text-xs font-semibold text-muted-foreground self-start">
                   #{index + 1}
                 </span>
-                <p className="text-sm font-medium text-center line-clamp-2 px-1 break-words">
+                <p className="text-sm font-medium text-center line-clamp-2 px-1 wrap-break-words">
                   {displayTitle}
                 </p>
                 <div className="w-2 h-2 rounded-full bg-accent/40" />
