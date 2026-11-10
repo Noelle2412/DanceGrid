@@ -1,7 +1,13 @@
-import React from "react";
+import { Suspense } from "react";
+import ChoreoEditor from "@/components/canvas/ChoreoEditor";
 
-const EditChoreoPage = () => {
-  return <div>EditChoreoPage</div>;
-};
-
-export default EditChoreoPage;
+export default function EditChoreoPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="p-4 text-muted-foreground">Loading editor...</div>
+      }>
+      <ChoreoEditor />
+    </Suspense>
+  );
+}

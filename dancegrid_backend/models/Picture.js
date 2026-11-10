@@ -6,7 +6,6 @@ export const PictureSchema = new Schema(
     id: {
       type: Schema.Types.String,
       required: true,
-      unique: true,
     },
     title: {
       type: Schema.Types.String,

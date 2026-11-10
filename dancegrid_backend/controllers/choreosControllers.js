@@ -1,5 +1,5 @@
 import ResponseError from "../utils/ResponseError.js";
-import { ChoreoModel } from "../models/ChoreoModel";
+import { ChoreoModel } from "../models/Choreo.js";
 import { ownerOfChoreo, canAccessChoreo } from "../utils/ChoreoPermissions.js";
 
 export const getChoreoById = async (req, res, next) => {
@@ -32,9 +32,10 @@ export const createChoreo = async (req, res, next) => {
 export const updateChoreo = async (req, res, next) => {
   try {
     const { name, gridSize, mode } = req.body;
-    if (!name && !gridSize && !mode)
-      throw new ResponseError("Provide at least one argument to update", 403);
     const updatedChoreo = await canAccessChoreo(req);
+    if (!name && !gridSize && !mode) {
+      res.status(200).json(updatedChoreo);
+    }
     await updatedChoreo.updateOne({
       name,
       gridSize,
@@ -57,7 +58,7 @@ export const deleteChoreo = async (req, res, next) => {
 
 export const updateCouples = async (req, res, next) => {
   try {
-    const couples = req.body({ couples });
+    const { couples } = req.body;
     const updatedChoreo = await canAccessChoreo(req);
     await updatedChoreo.updateOne({
       couples,
@@ -70,7 +71,7 @@ export const updateCouples = async (req, res, next) => {
 
 export const updatePictures = async (req, res, next) => {
   try {
-    const pictures = req.body({ pictures });
+    const { pictures } = req.body;
     const updatedChoreo = await canAccessChoreo(req);
     await updatedChoreo.updateOne({
       pictures,
@@ -83,7 +84,7 @@ export const updatePictures = async (req, res, next) => {
 
 export const addSharedUser = async (req, res, next) => {
   try {
-    const { id } = req.body({ sharedWithUser });
+    const { id } = req.body;
     const updatedChoreo = await ownerOfChoreo(req);
     if (updatedChoreo.sharedWith.includes(id))
       throw new ResponseError("Choreo already shared with that user", 403);
@@ -97,7 +98,7 @@ export const addSharedUser = async (req, res, next) => {
 
 export const removeSharedUser = async (req, res, next) => {
   try {
-    const { id } = req.body({ sharedWithUser });
+    const { id } = req.body;
     const updatedChoreo = await ownerOfChoreo(req);
     const index = updatedChoreo.sharedWith.indexOf(id);
     if (index === -1)

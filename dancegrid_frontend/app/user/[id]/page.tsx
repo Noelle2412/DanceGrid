@@ -1,12 +1,14 @@
-import React from "react";
+import ChoreoListing from "@/components/choreolisting/ChoreoListing";
+import { Suspense } from "react";
 
 const ProfilePage = () => {
   return (
-    <div>
-      ProfilePage
-      <div>Here is an overview of all the choreos you have created</div>
-      <div>Here is an overview of all the choreos you have access too</div>
-    </div>
+    <Suspense
+      fallback={
+        <div className="p-4 text-muted-foreground">Loading choreos...</div>
+      }>
+      <ChoreoListing />
+    </Suspense>
   );
 };
 

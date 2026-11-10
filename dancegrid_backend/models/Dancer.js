@@ -2,20 +2,18 @@ import { Schema } from "mongoose";
 
 const DancerSchema = new Schema(
   {
-    design: {
-      color: {
-        type: Schema.Types.String,
-        required: true,
-      },
-      shape: {
-        type: Schema.Types.String,
-        enum: ["circle", "square", "triangle"],
-        default: "circle",
-      },
-      name: {
-        type: Schema.Types.String,
-        default: "",
-      },
+    color: {
+      type: Schema.Types.String,
+      required: true,
+    },
+    shape: {
+      type: Schema.Types.String,
+      enum: ["circle", "square", "triangle"],
+      default: "circle",
+    },
+    name: {
+      type: Schema.Types.String,
+      default: "",
     },
   },
   { _id: false },

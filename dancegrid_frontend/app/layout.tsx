@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Tomorrow, Lato, Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import CookieProviderWrapper from "@/components/providers/CookieProviderWrapper";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -39,9 +40,11 @@ export default function RootLayout({
       )}>
       <body className="min-h-screen flex flex-col">
         <ThemeProvider attribute="class">
-          <Navbar />
-          <main className="bg-bg p-4 grow">{children}</main>
-          <Footer />
+          <CookieProviderWrapper>
+            <Navbar />
+            <main className="bg-bg p-4 grow">{children}</main>
+            <Footer />
+          </CookieProviderWrapper>
         </ThemeProvider>
       </body>
     </html>

@@ -4,11 +4,11 @@ export async function getChoreo(id) {
   const { data } = await client.get(`/choreos/${id}`);
   return data;
 }
-export async function createChoreo() {
+export async function createChoreo(body) {
   const { data } = await client.post(`/choreos/`, body);
   return data;
 }
-export async function updateChoreo(id) {
+export async function updateChoreo(id, body) {
   const { data } = await client.patch(`/choreos/${id}`, body);
   return data;
 }
@@ -16,8 +16,8 @@ export async function deleteChoreo(id) {
   const { data } = await client.delete(`/choreos/${id}`);
   return data;
 }
-export async function updateDancers(id, body) {
-  const { data } = await client.patch(`/choreos/${id}/update_dancers`, body);
+export async function updateCouples(id, body) {
+  const { data } = await client.patch(`/choreos/${id}/update_couples`, body);
   return data;
 }
 export async function updatePictures(id, body) {

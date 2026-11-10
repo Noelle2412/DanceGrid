@@ -14,7 +14,7 @@ promise
     console.log(error);
   });
 
-mongoose.connection.on("connected", () => {
+mongoose.connection.on("connected", async () => {
   console.log("Database found");
 });
 

@@ -19,7 +19,7 @@ router.post("/", requireAuth, createChoreo);
 router.patch("/:id", requireAuth, updateChoreo);
 router.delete("/:id", requireAuth, deleteChoreo);
 
-router.patch("/:id/update_dancers", requireAuth, updateCouples);
+router.patch("/:id/update_couples", requireAuth, updateCouples);
 
 router.patch("/:id/update_pictures", requireAuth, updatePictures);
 

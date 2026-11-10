@@ -1,5 +1,5 @@
-import { ChoreoModel } from "../models/Choreo";
-import ResponseError from "./ResponseError";
+import { ChoreoModel } from "../models/Choreo.js";
+import ResponseError from "./ResponseError.js";
 
 export async function canAccessChoreo(req) {
   const choreo = await ChoreoModel.findById(req.params.id);
