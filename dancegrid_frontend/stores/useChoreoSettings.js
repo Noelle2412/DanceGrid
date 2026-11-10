@@ -40,7 +40,6 @@ const useChoreoSettings = create((set, get) => ({
           },
           isLoading: false,
         });
-        return settings;
       }
     } catch (err) {
       console.error("Failed to load choreo settings:", err);

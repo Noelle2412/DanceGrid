@@ -40,7 +40,7 @@ const ChoreoSettings = () => {
 
   const handleSave = async () => {
     const user = cookies.user;
-    const userId = user?._id;
+    const userId = user?.id;
 
     try {
       const result = await saveChoreoSettings({ userId });

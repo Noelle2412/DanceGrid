@@ -10,6 +10,7 @@ import useDancers from "@/stores/useCouples";
 import CoordinateEntry from "./CoordinateEntry";
 import { Role } from "../types";
 import { updatePictures } from "@/api/choreos";
+import { useParams } from "next/navigation";
 
 interface PictureProps {
   pictureId: string;
@@ -25,6 +26,9 @@ function Picture({ pictureId }: PictureProps) {
 
   const { pictures, updateCoordinate } = usePictures();
   const { couples } = useDancers();
+
+  const params = useParams();
+  const choreoId = params?.id as string | undefined;
 
   const currentPicture = pictures.find((p) => p.id === pictureId);
 
@@ -57,13 +61,19 @@ function Picture({ pictureId }: PictureProps) {
       alert("Please log in to save a choreography.");
       return;
     }
+    if (!choreoId) {
+      alert("Unable to determine which choreography to save.");
+      return;
+    }
     try {
       setIsSaving(true);
-      const response = await updatePictures(pictures);
+      await updatePictures(choreoId, { pictures });
       alert("Pictures saved successfully!");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to save pictures:", error);
-      alert(error.message || "Failed to save picture");
+      alert(
+        error instanceof Error ? error.message : "Failed to save picture",
+      );
     } finally {
       setIsSaving(false);
     }

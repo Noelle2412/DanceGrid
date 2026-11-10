@@ -21,6 +21,8 @@ interface PicturesState {
   deletePicture: (id: string) => Promise<void>;
 }
 
+let latestFetchRequest = 0;
+
 const usePictures = create<PicturesState>()((set, get) => ({
   choreoId: null,
   pictures: [],
@@ -29,8 +31,10 @@ const usePictures = create<PicturesState>()((set, get) => ({
 
   setChoreoId: (id: string | null) => set({ choreoId: id }),
 
-  resetPictures: () =>
-    set({ choreoId: null, pictures: [], error: null, isLoading: false }),
+  resetPictures: () => {
+    latestFetchRequest += 1;
+    set({ choreoId: null, pictures: [], error: null, isLoading: false });
+  },
 
   syncWithBackend: async (picsOverride?: Picture[]) => {
     const { choreoId } = get();
@@ -46,20 +50,24 @@ const usePictures = create<PicturesState>()((set, get) => ({
 
   fetchPictures: async (choreoId: string) => {
     if (!choreoId) return;
-    set({ choreoId, isLoading: true, error: null });
+    const requestId = ++latestFetchRequest;
+    set({ choreoId, pictures: [], isLoading: true, error: null });
     try {
       const choreo = await getChoreo(choreoId);
-      const data =
-        choreo?.pictures ||
-        choreo?.choreo?.pictures ||
-        choreo?.data?.pictures ||
-        [];
+      if (requestId !== latestFetchRequest || get().choreoId !== choreoId) {
+        return;
+      }
+      const data = Array.isArray(choreo?.pictures) ? choreo.pictures : [];
       set({ pictures: data, isLoading: false });
       return data;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      if (requestId !== latestFetchRequest || get().choreoId !== choreoId) {
+        return;
+      }
       console.error("Failed to fetch pictures:", err);
       set({
-        error: err?.message || "Failed to load pictures",
+        pictures: [],
+        error: err instanceof Error ? err.message : "Failed to load pictures",
         isLoading: false,
       });
     }
@@ -80,6 +88,7 @@ const usePictures = create<PicturesState>()((set, get) => ({
       order: orderNumber,
       id,
       title: "",
+      comment: "",
     };
     const nextPictures = [...state.pictures, newPic];
     set({ pictures: nextPictures });
