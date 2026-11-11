@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 dotenv.config();
+import passport from "./config/passport.js";
 import usersRouters from "./routers/usersRouters.js";
 import choreosRouters from "./routers/choreosRouters.js";
 import errorHandler from "./middlewares/errorHandler.js";
@@ -10,8 +11,8 @@ import { connectDB } from "./db/db.js";
 
 const app = express();
 app.use(express.json());
-const ORIGIN = process.env.ORIGIN;
-app.use(cors({ origin: ORIGIN, credentials: true }));
+app.use(passport.initialize());
+app.use(cors({ origin: process.env.ORIGIN, credentials: true }));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 

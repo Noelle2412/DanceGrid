@@ -26,7 +26,7 @@ const FOURTEEN_DAYS = 14 * 24 * 60 * 60 * 1000;
 export function setAuthCookie(res, user) {
   res.cookie("token", createToken(user), {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "none",
     secure: process.env.NODE_ENV === "production",
     maxAge: FOURTEEN_DAYS,
   });
@@ -35,7 +35,7 @@ export function setAuthCookie(res, user) {
 export function clearAuthCookie(res) {
   res.clearCookie("token", {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "none",
     secure: process.env.NODE_ENV === "production",
   });
 }
@@ -44,7 +44,7 @@ export function publicUser(user) {
   return {
     id: user._id,
     email: user.email,
-    provider: user.proivder,
+    provider: user.provider,
   };
 }
 
