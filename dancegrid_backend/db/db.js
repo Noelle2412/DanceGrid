@@ -2,24 +2,18 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 dotenv.config();
 
-let URI = process.env.MONGODB_URI;
-const promise = mongoose.connect(URI);
-
-promise
-  .then(() => {
-    console.log("Initialized connection to Database");
-  })
-  .catch((error) => {
-    console.log("Connection with DanceGrid Database failed");
-    console.log(error);
-  });
-
-mongoose.connection.on("connected", async () => {
-  console.log("Database found");
-});
-
-mongoose.connection.on("error", (error) => {
-  console.log("Database not found");
-});
-
-export default URI;
+export async function connectDB() {
+  const URI = process.env.MONGODB_URI;
+  if (!URI) {
+    throw new Error("MONGODB_URI environment variable is missing!");
+  }
+  try {
+    await mongoose.connect(URI, {
+      serverSelectionTimeoutMS: 10000,
+    });
+    console.log("Successfully connected to DanceGrid MongoDB!");
+  } catch (error) {
+    console.error("MongoDB connection failed:", error.message);
+    throw error;
+  }
+}
