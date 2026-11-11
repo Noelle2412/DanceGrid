@@ -1,137 +1,122 @@
 import { create } from "zustand";
-import { getChoreo, updateCouples } from "@/api/choreos";
+import { updateCouples } from "@/api/choreos";
 
-const useCouples = create((set, get) => ({
+const defaultDancer = () => ({
+  name: "Name",
+  color: "#000000",
+  shape: "circle",
+});
+
+const normalizeDancer = (d) => ({
+  name: d?.name ?? "Name",
+  color: d?.color ?? "#000000",
+  shape: d?.shape ?? "circle",
+});
+
+const normalizeCouple = (c) => ({
+  ...c,
+  leader: normalizeDancer(c.leader),
+  follower: normalizeDancer(c.follower),
+});
+
+const errorMessage = (err, fallback) => err?.message || fallback;
+
+const initialState = {
   choreoId: null,
   couples: [],
+  // Loading (filled by loadChoreo in choreoSession.ts)
   isLoading: false,
   error: null,
-
+  // Saving
+  isSaving: false,
+  isDirty: false, // local state differs from the backend
+  saveError: null,
+};
+// Applies a local edit and flags the store as having unsaved changes.
+const edited = (state, couples) => ({
+  couples,
+  isDirty: true,
+});
+const useCouples = create((set, get) => ({
+  ...initialState,
   setChoreoId: (id) => set({ choreoId: id }),
+  setCouples: (couples) => set((state) => edited(state, couples || [])),
+  resetCouples: () => set({ ...initialState }),
 
-  setCouples: (couples) => set({ couples: couples || [] }),
-
-  resetCouples: () =>
-    set({ choreoId: null, couples: [], error: null, isLoading: false }),
-
-  // Centralized backend sync helper
-  syncWithBackend: async (couplesOverride) => {
-    const { choreoId } = get();
-    if (!choreoId) return;
-    const toSend = couplesOverride ?? get().couples;
-    try {
-      await updateCouples(choreoId, { couples: toSend });
-    } catch (err) {
-      console.error("Failed to sync couples with backend:", err);
-      throw err;
-    }
+  // Loading (called by loadChoreo, never fetches on its own)
+  beginLoad: (id) => set({ ...initialState, choreoId: id, isLoading: true }),
+  failLoad: (message) => set({ error: message, isLoading: false }),
+  hydrate: (choreo) => {
+    const raw = choreo?.couples || [];
+    set({
+      couples: raw.map(normalizeCouple),
+      isLoading: false,
+      error: null,
+      isDirty: false,
+      saveError: null,
+    });
   },
 
-  fetchCouples: async (choreoId) => {
-    if (!choreoId) return;
-    set({ choreoId, isLoading: true, error: null });
-    try {
-      const choreo = await getChoreo(choreoId);
-      const couplesData =
-        choreo?.couples ||
-        choreo?.dancers ||
-        choreo?.choreo?.couples ||
-        choreo?.choreo?.dancers ||
-        [];
-
-      const normalized = (couplesData || []).map((c) => ({
-        ...c,
-        leader: {
-          name: c.leader?.name ?? "Name",
-          color: c.leader?.color ?? "#000000",
-          shape: c.leader?.shape ?? "circle",
-        },
-        follower: {
-          name: c.follower?.name ?? "Name",
-          color: c.follower?.color ?? "#000000",
-          shape: c.follower?.shape ?? "circle",
-        },
-      }));
-
-      set({ couples: normalized, isLoading: false });
-      return normalized;
-    } catch (err) {
-      console.error("Failed to fetch dancers:", err);
-      set({
-        error: err?.message || "Failed to load dancers",
-        isLoading: false,
-      });
-    }
-  },
-
-  updateCouple: async (number, newNumber) => {
+  // Local edits (never touch the backend)
+  updateCouple: (number, newNumber) => {
     if (number === newNumber) return;
-    const { couples } = get();
-    if (couples.some((c) => c.number === newNumber)) {
+    if (!Number.isInteger(newNumber)) {
+      throw new Error("Couple / dancer number must be a whole number.");
+    }
+    if (get().couples.some((c) => c.number === newNumber)) {
       throw new Error(`Couple / dancer number ${newNumber} already exists.`);
     }
-
-    const nextCouples = couples.map((c) =>
-      c.number === number ? { ...c, number: newNumber } : c,
+    set((state) =>
+      edited(
+        state,
+        state.couples.map((c) =>
+          c.number === number ? { ...c, number: newNumber } : c,
+        ),
+      ),
     );
-    set({ couples: nextCouples });
-    await get().syncWithBackend(nextCouples);
   },
 
   updateDancer: (number, role, name, color, shape) => {
-    set((state) => ({
-      couples: state.couples.map((c) => {
-        if (c.number === number) {
+    set((state) =>
+      edited(
+        state,
+        state.couples.map((c) => {
+          if (c.number !== number) return c;
           const dancer = c[role] || {};
           return {
             ...c,
             [role]: {
               ...dancer,
-              name:
-                name !== undefined && name !== null
-                  ? name
-                  : (dancer.name ?? "Name"),
-              color:
-                color !== undefined && color !== null
-                  ? color
-                  : (dancer.color ?? "#000000"),
-              shape:
-                shape !== undefined && shape !== null
-                  ? shape
-                  : (dancer.shape ?? "circle"),
+              name: name ?? dancer.name ?? "Name",
+              color: color ?? dancer.color ?? "#000000",
+              shape: shape ?? dancer.shape ?? "circle",
             },
           };
-        }
-        return c;
-      }),
-    }));
+        }),
+      ),
+    );
   },
 
-  addCouple: async (number, leader, follower) => {
-    const nextCouples = [
-      ...get().couples,
-      {
-        number,
-        leader: leader || {
-          name: "Name",
-          color: "#000000",
-          shape: "circle",
+  addCouple: (number, leader, follower) => {
+    set((state) =>
+      edited(state, [
+        ...state.couples,
+        {
+          number,
+          leader: leader || defaultDancer(),
+          follower: follower || defaultDancer(),
         },
-        follower: follower || {
-          name: "Name",
-          color: "#000000",
-          shape: "circle",
-        },
-      },
-    ];
-    set({ couples: nextCouples });
-    await get().syncWithBackend(nextCouples);
+      ]),
+    );
   },
 
-  deleteCouple: async (number) => {
-    const nextCouples = get().couples.filter((c) => c.number !== number);
-    set({ couples: nextCouples });
-    await get().syncWithBackend(nextCouples);
+  deleteCouple: (number) => {
+    set((state) =>
+      edited(
+        state,
+        state.couples.filter((c) => c.number !== number),
+      ),
+    );
   },
 
   generateNumber: (couples) => {
@@ -142,6 +127,32 @@ const useCouples = create((set, get) => ({
       }
     }
     return list.length;
+  },
+
+  // Saving: on success returns true, on failure the local
+  // state is kept, isDirty stays true and saveError is set.
+  saveCouples: async () => {
+    const { choreoId, couples, revision } = get();
+    if (!choreoId) {
+      set({ saveError: "Save the choreography settings first." });
+      return false;
+    }
+    set({ isSaving: true, saveError: null });
+    try {
+      await updateCouples(choreoId, { couples });
+      set((state) => ({
+        isSaving: false,
+        isDirty: state.revision !== revision,
+      }));
+      return true;
+    } catch (err) {
+      console.error("Failed to save couples:", err);
+      set({
+        isSaving: false,
+        saveError: errorMessage(err, "Failed to save dancers"),
+      });
+      return false;
+    }
   },
 }));
 

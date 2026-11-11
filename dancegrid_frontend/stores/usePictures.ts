@@ -1,205 +1,203 @@
 import { create } from "zustand";
 import { DancerPosition, Picture, Role } from "../components/types";
-import { getChoreo, updatePictures } from "@/api/choreos";
+import { updatePictures } from "@/api/choreos";
 
 interface PicturesState {
   choreoId: string | null;
   pictures: Picture[];
+  // Loading (filled by loadChoreo in choreoSession.ts)
   isLoading: boolean;
   error: string | null;
+  // Saving
+  isSaving: boolean;
+  isDirty: boolean; //Local state differs from the backend
+  saveError: string | null;
+
   setChoreoId: (id: string | null) => void;
   resetPictures: () => void;
-  fetchPictures: (choreoId: string) => Promise<Picture[] | undefined>;
-  syncWithBackend: (pics?: Picture[]) => Promise<void>;
-  addPicture: (coordinates: DancerPosition[]) => Promise<void>;
+  beginLoad: (id: string) => void;
+  hydrate: (choreo: { pictures?: Picture[] } | null | undefined) => void;
+  failLoad: (message: string) => void;
+
+  // Local edits (never touch the backend).
+  addPicture: (coordinates: DancerPosition[]) => string;
   updateCoordinate: (id: string, coordinate: DancerPosition) => void;
   updateX: (id: string, coupleNumber: number, role: Role, x: number) => void;
   updateY: (id: string, coupleNumber: number, role: Role, y: number) => void;
   updateComment: (id: string, comment: string) => void;
   updateTitle: (id: string, title: string) => void;
-  reorderPicture: (id: string, previd: string, nextid: string) => Promise<void>;
-  deletePicture: (id: string) => Promise<void>;
+  reorderPicture: (id: string, previd: string, nextid: string) => void;
+  deletePicture: (id: string) => void;
+
+  // Saves all pictures at once. Resolves to true on success.
+  savePictures: () => Promise<boolean>;
 }
 
-let latestFetchRequest = 0;
-
-const usePictures = create<PicturesState>()((set, get) => ({
+const initialState = {
   choreoId: null,
-  pictures: [],
+  pictures: [] as Picture[],
   isLoading: false,
   error: null,
+  isSaving: false,
+  isDirty: false,
+  saveError: null,
+  revision: 0,
+};
 
-  setChoreoId: (id: string | null) => set({ choreoId: id }),
+// Applies a local edit and flags the store as having unsaved changes.
+const edited = (state: PicturesState, pictures: Picture[]) => ({
+  pictures,
+  isDirty: true,
+});
 
-  resetPictures: () => {
-    latestFetchRequest += 1;
-    set({ choreoId: null, pictures: [], error: null, isLoading: false });
-  },
+// Sets x and/or y of one dancer in one picture, adding the dancer if needed.
+const upsertCoordinate = (
+  pictures: Picture[],
+  id: string,
+  coupleNumber: number,
+  role: Role,
+  patch: Partial<Pick<DancerPosition, "x" | "y">>,
+): Picture[] =>
+  pictures.map((p) => {
+    if (p.id !== id) return p;
+    const matches = (c: DancerPosition) =>
+      c.coupleNumber === coupleNumber && c.role === role;
+    const coordinates = p.coordinates.some(matches)
+      ? p.coordinates.map((c) => (matches(c) ? { ...c, ...patch } : c))
+      : [...p.coordinates, { coupleNumber, role, x: 0, y: 0, ...patch }];
+    return { ...p, coordinates };
+  });
 
-  syncWithBackend: async (picsOverride?: Picture[]) => {
-    const { choreoId } = get();
-    if (!choreoId) return;
-    const toSend = picsOverride ?? get().pictures;
-    try {
-      await updatePictures(choreoId, { pictures: toSend });
-    } catch (err: any) {
-      console.error("Failed to sync pictures with backend:", err);
-      throw err;
-    }
-  },
+const usePictures = create<PicturesState>()((set, get) => ({
+  ...initialState,
+  setChoreoId: (id) => set({ choreoId: id }),
+  resetPictures: () => set({ ...initialState }),
 
-  fetchPictures: async (choreoId: string) => {
-    if (!choreoId) return;
-    const requestId = ++latestFetchRequest;
-    set({ choreoId, pictures: [], isLoading: true, error: null });
-    try {
-      const choreo = await getChoreo(choreoId);
-      if (requestId !== latestFetchRequest || get().choreoId !== choreoId) {
-        return;
-      }
-      const data = Array.isArray(choreo?.pictures) ? choreo.pictures : [];
-      set({ pictures: data, isLoading: false });
-      return data;
-    } catch (err: unknown) {
-      if (requestId !== latestFetchRequest || get().choreoId !== choreoId) {
-        return;
-      }
-      console.error("Failed to fetch pictures:", err);
-      set({
-        pictures: [],
-        error: err instanceof Error ? err.message : "Failed to load pictures",
-        isLoading: false,
-      });
-    }
-  },
+  // Loading (called by loadChoreo, never fetches on its own)
+  beginLoad: (id) => set({ ...initialState, choreoId: id, isLoading: true }),
+  failLoad: (message) => set({ error: message, isLoading: false }),
+  hydrate: (choreo) =>
+    set({
+      pictures: Array.isArray(choreo?.pictures) ? choreo.pictures : [],
+      isLoading: false,
+      error: null,
+      isDirty: false,
+      saveError: null,
+    }),
 
-  addPicture: async (coordinates: DancerPosition[]) => {
-    const state = get();
-    const orderNumber =
-      Math.max(
-        0,
-        state.pictures
-          .map((p: Picture) => p.order)
-          .reduce((a: number, b: number) => Math.max(a, b), 0),
-      ) + 1;
+  // Local edits (never touch the backend)
+  addPicture: (coordinates) => {
     const id = Math.random().toString(36).slice(2, 9);
-    const newPic: Picture = {
-      coordinates: coordinates || [],
-      order: orderNumber,
-      id,
-      title: "",
-      comment: "",
-    };
-    const nextPictures = [...state.pictures, newPic];
-    set({ pictures: nextPictures });
-    await get().syncWithBackend(nextPictures);
+    set((state) => {
+      const order = Math.max(0, ...state.pictures.map((p) => p.order)) + 1;
+      const newPic: Picture = {
+        id,
+        coordinates: coordinates || [],
+        order,
+        title: "",
+        comment: "",
+      };
+      return edited(state, [...state.pictures, newPic]);
+    });
+    return id;
   },
 
-  reorderPicture: async (id: string, previd: string, nextid: string) => {
-    const state = get();
-    const prevPic = state.pictures.find((p) => p.id === previd);
-    const nextPic = state.pictures.find((p) => p.id === nextid);
+  reorderPicture: (id, previd, nextid) => {
+    const { pictures } = get();
+    const prevPic = pictures.find((p) => p.id === previd);
+    const nextPic = pictures.find((p) => p.id === nextid);
     if (!prevPic || !nextPic) {
       throw new Error("Picture not found");
     }
     const newOrder = (prevPic.order + nextPic.order) / 2;
-    const nextPictures = state.pictures.map((p) => {
-      if (p.id === id) {
-        return { ...p, order: newOrder };
-      }
-      return p;
-    });
-    set({ pictures: nextPictures });
-    await get().syncWithBackend(nextPictures);
-  },
-
-  updateComment: (id: string, comment: string) => {
-    set((state: PicturesState) => ({
-      pictures: state.pictures.map((p) =>
-        p.id === id ? { ...p, comment } : p,
+    set((state) =>
+      edited(
+        state,
+        state.pictures.map((p) =>
+          p.id === id ? { ...p, order: newOrder } : p,
+        ),
       ),
-    }));
+    );
   },
 
-  updateTitle: (id: string, title: string) => {
-    set((state: PicturesState) => ({
-      pictures: state.pictures.map((p) => (p.id === id ? { ...p, title } : p)),
-    }));
-  },
+  updateComment: (id, comment) =>
+    set((state) =>
+      edited(
+        state,
+        state.pictures.map((p) => (p.id === id ? { ...p, comment } : p)),
+      ),
+    ),
 
-  updateCoordinate: (id: string, coordinate: DancerPosition) => {
-    set((state: PicturesState) => ({
-      pictures: state.pictures.map((p) => {
-        if (p.id !== id) return p;
+  updateTitle: (id, title) =>
+    set((state) =>
+      edited(
+        state,
+        state.pictures.map((p) => (p.id === id ? { ...p, title } : p)),
+      ),
+    ),
 
-        const exists = p.coordinates.some(
-          (c) =>
-            c.coupleNumber === coordinate.coupleNumber &&
-            c.role === coordinate.role,
-        );
+  updateCoordinate: (id, coordinate) =>
+    set((state) =>
+      edited(
+        state,
+        upsertCoordinate(
+          state.pictures,
+          id,
+          coordinate.coupleNumber,
+          coordinate.role,
+          { x: coordinate.x, y: coordinate.y },
+        ),
+      ),
+    ),
 
-        const nextCoords = exists
-          ? p.coordinates.map((c) =>
-              c.coupleNumber === coordinate.coupleNumber &&
-              c.role === coordinate.role
-                ? { ...c, x: coordinate.x, y: coordinate.y }
-                : c,
-            )
-          : [...p.coordinates, coordinate];
+  updateX: (id, coupleNumber, role, x) =>
+    set((state) =>
+      edited(
+        state,
+        upsertCoordinate(state.pictures, id, coupleNumber, role, { x }),
+      ),
+    ),
 
-        return { ...p, coordinates: nextCoords };
-      }),
-    }));
-  },
+  updateY: (id, coupleNumber, role, y) =>
+    set((state) =>
+      edited(
+        state,
+        upsertCoordinate(state.pictures, id, coupleNumber, role, { y }),
+      ),
+    ),
 
-  updateX: (id: string, coupleNumber: number, role: Role, x: number) => {
-    set((state: PicturesState) => ({
-      pictures: state.pictures.map((p) => {
-        if (p.id !== id) return p;
+  deletePicture: (id) =>
+    set((state) =>
+      edited(
+        state,
+        state.pictures.filter((p) => p.id !== id),
+      ),
+    ),
 
-        const exists = p.coordinates.some(
-          (c) => c.coupleNumber === coupleNumber && c.role === role,
-        );
-
-        const nextCoords = exists
-          ? p.coordinates.map((c) =>
-              c.coupleNumber === coupleNumber && c.role === role
-                ? { ...c, x }
-                : c,
-            )
-          : [...p.coordinates, { coupleNumber, role, x, y: 0 }];
-
-        return { ...p, coordinates: nextCoords };
-      }),
-    }));
-  },
-
-  updateY: (id: string, coupleNumber: number, role: Role, y: number) => {
-    set((state: PicturesState) => ({
-      pictures: state.pictures.map((p) => {
-        if (p.id !== id) return p;
-
-        const exists = p.coordinates.some(
-          (c) => c.coupleNumber === coupleNumber && c.role === role,
-        );
-
-        const nextCoords = exists
-          ? p.coordinates.map((c) =>
-              c.coupleNumber === coupleNumber && c.role === role
-                ? { ...c, y }
-                : c,
-            )
-          : [...p.coordinates, { coupleNumber, role, x: 0, y }];
-
-        return { ...p, coordinates: nextCoords };
-      }),
-    }));
-  },
-
-  deletePicture: async (id: string) => {
-    const nextPictures = get().pictures.filter((p: Picture) => p.id !== id);
-    set({ pictures: nextPictures });
-    await get().syncWithBackend(nextPictures);
+  // Saving. On failure the local state is kept, isDirty stays true and saveError is set.
+  savePictures: async () => {
+    const { choreoId, pictures } = get();
+    if (!choreoId) {
+      set({ saveError: "Save the choreography settings first." });
+      return false;
+    }
+    set({ isSaving: true, saveError: null });
+    try {
+      await updatePictures(choreoId, { pictures });
+      set((state) => ({
+        isSaving: false,
+      }));
+      return true;
+    } catch (err: any) {
+      console.error("Failed to save pictures:", err);
+      set({
+        isSaving: false,
+        saveError:
+          err?.response?.data?.message ||
+          (err instanceof Error ? err.message : "Failed to save pictures"),
+      });
+      return false;
+    }
   },
 }));
 

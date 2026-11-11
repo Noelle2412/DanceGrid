@@ -1,11 +1,12 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useCookies } from "react-cookie";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import useChoreoSettings from "../../stores/useChoreoSettings";
 import useCouples from "../../stores/useCouples";
+import { saveSettingsAndCouples } from "../../stores/choreoSession";
 import CoupleSettings from "./CoupleSettings";
 
 const ChoreoSettings = () => {
@@ -19,45 +20,50 @@ const ChoreoSettings = () => {
   const {
     settings,
     isLoading,
-    isSaving,
-    fetchChoreoSettings,
-    resetSettings,
-    saveChoreoSettings,
+    isSaving: settingsSaving,
+    isDirty: settingsDirty,
+    saveError: settingsSaveError,
+    sharedWith,
+    isSharing,
+    shareError,
+    fetchSharedUsers,
+    shareWith,
+    unshare,
     updateName,
     updateX,
     updateY,
     updateMode,
   } = useChoreoSettings();
 
-  const { couples } = useCouples();
+  const {
+    isSaving: couplesSaving,
+    isDirty: couplesDirty,
+    saveError: couplesSaveError,
+  } = useCouples();
+
+  const [shareEmail, setShareEmail] = useState("");
+
+  const isSaving = settingsSaving || couplesSaving;
+  const isDirty = settingsDirty || couplesDirty;
+  const saveError = settingsSaveError || couplesSaveError;
 
   useEffect(() => {
-    if (choreoId) {
-      fetchChoreoSettings(choreoId);
-    } else {
-      resetSettings();
+    if (user && choreoId) {
+      void fetchSharedUsers(choreoId);
     }
-  }, [choreoId, fetchChoreoSettings, resetSettings]);
+  }, [user, choreoId, fetchSharedUsers]);
 
   const handleSave = async () => {
-    const userId = user?.id;
-
-    try {
-      const result = await saveChoreoSettings({ userId });
-      if (result.created && result.id) {
-        alert("Choreography created successfully!");
-        router.push(`/choreos/${result.id}`);
-      } else {
-        alert("Choreography settings updated successfully!");
-      }
-    } catch (error: any) {
-      console.error("Failed to save choreography:", error);
-      alert(
-        error?.response?.data?.message ||
-          error.message ||
-          "Failed to save choreography",
-      );
+    const result = await saveSettingsAndCouples({ userId: user?.id });
+    // A new choreography now has an id: move to its URL.
+    if (!choreoId && result.status === "saved" && result.id) {
+      router.push(`/choreos/${result.id}`);
     }
+  };
+
+  const handleShare = async () => {
+    const ok = await shareWith(shareEmail);
+    if (ok) setShareEmail("");
   };
 
   if (isLoading) {
@@ -133,29 +139,49 @@ const ChoreoSettings = () => {
             onClick={handleSave}>
             {isSaving ? "Saving..." : "Save"}
           </button>
+          {isDirty && !isSaving && (
+            <span className="text-sm text-amber-600">Unsaved changes</span>
+          )}
+          {saveError && (
+            <span className="text-sm text-red-500">{saveError}</span>
+          )}
           <button
             className="w-20 bg-secondary text-white rounded-md p-2 cursor-pointer disabled:opacity-50 hover:opacity-90 transition-opacity"
-            disabled={isSaving}
+            disabled={isSharing || !choreoId || !shareEmail.trim()}
             onClick={handleShare}>
-            {isSaving ? "Saving..." : "Share"}
+            {isSharing ? "Sharing..." : "Share"}
           </button>
           <Input
             className="w-32"
             name="share_email"
             type="text"
             placeholder="Email or Username"
-            onBlur={(e) => {
-              const sharedEmail = e.target.value;
-            }}
+            value={shareEmail}
+            onChange={(e) => setShareEmail(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                (e.target as HTMLInputElement).blur();
+                void handleShare();
               }
             }}
           />{" "}
           <div>
             <span className="font-semibold">Shared with:</span>
-            <ul>{}</ul>
+            <ul>
+              {sharedWith.map((entry: string) => (
+                <li key={entry} className="flex items-center gap-2">
+                  <span>{entry}</span>
+                  <button
+                    type="button"
+                    className="text-red-600 cursor-pointer"
+                    aria-label={`Stop sharing with ${entry}`}
+                    disabled={isSharing}
+                    onClick={() => void unshare(entry)}>
+                    ×
+                  </button>
+                </li>
+              ))}
+            </ul>
+            {shareError && <p className="text-sm text-red-500">{shareError}</p>}
           </div>
         </div>
       ) : null}

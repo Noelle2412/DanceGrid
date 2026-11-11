@@ -31,11 +31,9 @@ function CoordInput({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
     setText(raw);
-
     // Normalize comma to dot for parsing
     const normalized = raw.replace(",", ".");
     const parsed = parseFloat(normalized);
-
     // Only update store if it's a valid complete number and not ending in a dangling dot/minus
     if (
       !isNaN(parsed) &&

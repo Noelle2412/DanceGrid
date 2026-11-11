@@ -1,8 +1,9 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import ChoreoSettings from "@/components/canvas/ChoreoSettings";
 import usePictures from "@/stores/usePictures";
+import { loadChoreo, resetChoreo } from "@/stores/choreoSession";
 import PicturesOverview from "@/components/canvas/PicturesOverview";
 import Picture from "@/components/canvas/Picture";
 import ExportPdfButton from "../pdf/ExportPdfButton";
@@ -15,20 +16,23 @@ export default function ChoreoEditor() {
     choreoId: picturesChoreoId,
     isLoading,
     error,
-    fetchPictures,
-    resetPictures,
   } = usePictures();
   const [selectedPictureId, setSelectedPictureId] = useState<string | null>(
     null,
   );
 
+  // A single request fills settings, couples and pictures.
+  // Skipped if the choreography is already loaded (e.g. right after it was created in this session).
   useEffect(() => {
     if (choreoId) {
-      void fetchPictures(choreoId);
+      void loadChoreo(choreoId);
     } else {
-      resetPictures();
+      resetChoreo();
     }
-  }, [choreoId, fetchPictures, resetPictures]);
+  }, [choreoId]);
+
+  // Clear the stores when leaving the editor.
+  useEffect(() => resetChoreo, []);
 
   const activePictureId = pictures.some(
     (picture) => picture.id === selectedPictureId,

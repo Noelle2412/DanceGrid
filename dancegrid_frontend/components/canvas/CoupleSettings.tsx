@@ -1,58 +1,31 @@
 "use client";
-import { useEffect } from "react";
-import { useParams } from "next/navigation";
 import useCouples from "@/stores/useCouples";
 import useChoreoSettings from "@/stores/useChoreoSettings";
 import { Input } from "../ui/input";
 import { ItemAppearancePicker } from "./Itemappearancepicker";
 
 const CoupleSettings = () => {
-  const params = useParams();
-  const choreoId = params?.id as string | undefined;
   const { settings } = useChoreoSettings();
 
   const {
     couples,
-    fetchCouples,
-    resetCouples,
     addCouple,
     deleteCouple,
     updateDancer,
     generateNumber,
     updateCouple,
-    syncWithBackend,
   } = useCouples();
 
-  // Fetch dancers on load or reset for new choreo
-  useEffect(() => {
-    if (choreoId) {
-      fetchCouples(choreoId);
-    } else {
-      resetCouples();
-    }
-  }, [choreoId, fetchCouples, resetCouples]);
-
   const handleAddCouple = () => {
-    const leader = {
-      shape: "circle",
-      color: "#000000",
-      name: "Name",
-    };
-    const follower = {
-      shape: "circle",
-      color: "#000000",
-      name: "Name",
-    };
-    addCouple(generateNumber(couples), leader, follower);
+    addCouple(generateNumber());
   };
 
-  const handleAppearanceChange = async (
+  const handleAppearanceChange = (
     coupleNumber: number,
     role: "leader" | "follower",
     next: { color: string; shape: string },
   ) => {
     updateDancer(coupleNumber, role, null, next.color, next.shape);
-    await syncWithBackend();
   };
 
   return (
@@ -99,7 +72,7 @@ const CoupleSettings = () => {
                     placeholder="#"
                     key={`num-${couple.number}`}
                     defaultValue={couple.number}
-                    onBlur={async (e) => {
+                    onBlur={(e) => {
                       const rawVal = e.target.value.trim();
                       if (rawVal === "") {
                         e.target.value = couple.number;
@@ -110,7 +83,7 @@ const CoupleSettings = () => {
                         return;
                       }
                       try {
-                        await updateCouple(couple.number, newNum);
+                        updateCouple(couple.number, newNum);
                       } catch (error: any) {
                         alert(error.message || error);
                         e.target.value = couple.number;
@@ -139,7 +112,6 @@ const CoupleSettings = () => {
                         leaderShape,
                       );
                     }}
-                    onBlur={() => syncWithBackend()}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         (e.target as HTMLInputElement).blur();
@@ -173,7 +145,6 @@ const CoupleSettings = () => {
                           followerShape,
                         );
                       }}
-                      onBlur={() => syncWithBackend()}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           (e.target as HTMLInputElement).blur();

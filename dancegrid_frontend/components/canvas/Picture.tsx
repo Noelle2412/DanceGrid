@@ -1,16 +1,14 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { Layer, Stage } from "react-konva";
 import { DraggableItem } from "./DraggableItem";
 import { Grid } from "./Grid";
 import { useCookies } from "react-cookie";
 import usePictures from "@/stores/usePictures";
 import useChoreoSettings from "@/stores/useChoreoSettings";
-import useDancers from "@/stores/useCouples";
+import useCouples from "@/stores/useCouples";
 import CoordinateEntry from "./CoordinateEntry";
 import { Role } from "../types";
-import { updatePictures } from "@/api/choreos";
-import { useParams } from "next/navigation";
 
 interface PictureProps {
   pictureId: string;
@@ -24,12 +22,19 @@ function Picture({ pictureId }: PictureProps) {
   // Both layers are shifted so that (0, 0) lies in the center of the stage.
   const origin = { x: stageWidth / 2, y: stageHeight / 2 };
 
-  const { pictures, updateCoordinate, addPicture, deletePicture } =
-    usePictures();
-  const { couples } = useDancers();
+  const {
+    pictures,
+    updateCoordinate,
+    deletePicture,
+    savePictures,
+    isSaving,
+    isDirty,
+    saveError,
+  } = usePictures();
+  const { couples } = useCouples();
 
-  const params = useParams();
-  const choreoId = params?.id as string | undefined;
+  const [cookies] = useCookies(["user"]);
+  const user = cookies.user;
 
   const currentPicture = pictures.find((p) => p.id === pictureId);
 
@@ -51,44 +56,6 @@ function Picture({ pictureId }: PictureProps) {
       x: pos.x,
       y: pos.y,
     });
-  };
-
-  const [cookies] = useCookies(["user"]);
-  const user = cookies.user;
-  const [isSaving, setIsSaving] = useState(false);
-
-  const handleSave = async () => {
-    if (!user?.id) {
-      alert("Please log in to save a choreography.");
-      return;
-    }
-    if (!choreoId) {
-      alert("Unable to determine which choreography to save.");
-      return;
-    }
-    try {
-      setIsSaving(true);
-      await updatePictures(choreoId, { pictures });
-      alert("Pictures saved successfully!");
-    } catch (error: unknown) {
-      console.error("Failed to save pictures:", error);
-      alert(error instanceof Error ? error.message : "Failed to save picture");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    try {
-      await deletePicture(pictureId);
-    } catch (error: any) {
-      console.error("Failed to delete picture: ", error);
-      alert(
-        error instanceof Error ? error.message : "Failed to delete picture",
-      );
-    } finally {
-      setIsSaving(false);
-    }
   };
 
   return (
@@ -134,18 +101,25 @@ function Picture({ pictureId }: PictureProps) {
       <CoordinateEntry pictureId={pictureId} />
       <div className="flex flex-col gap-4">
         {Boolean(user) ? (
-          <button
-            className="bg-secondary text-white rounded-md p-2 cursor-pointer disabled:opacity-50 hover:opacity-90 transition-opacity"
-            disabled={isSaving}
-            onClick={handleSave}>
-            {isSaving ? "Saving..." : "Save Pictures"}
-          </button>
+          <>
+            <button
+              className="bg-secondary text-white rounded-md p-2 cursor-pointer disabled:opacity-50 hover:opacity-90 transition-opacity"
+              disabled={isSaving}
+              onClick={() => void savePictures()}>
+              {isSaving ? "Saving..." : "Save Pictures"}
+            </button>
+            {isDirty && !isSaving && (
+              <span className="text-sm text-amber-600">Unsaved changes</span>
+            )}
+            {saveError && (
+              <span className="text-sm text-red-500">{saveError}</span>
+            )}
+          </>
         ) : null}
         <button
-          className="bg-red-500 text-white rounded-md p-2 cursor-pointer disabled:opacity-50 hover:opacity-90 transition-opacity"
-          disabled={isSaving}
-          onClick={handleDelete}>
-          {isSaving ? "Saving..." : "Delete this Picture"}
+          className="bg-red-500 text-white rounded-md p-2 cursor-pointer hover:opacity-90 transition-opacity"
+          onClick={() => deletePicture(pictureId)}>
+          Delete this Picture
         </button>
       </div>
     </div>
