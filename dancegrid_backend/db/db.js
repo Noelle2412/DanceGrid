@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 dotenv.config();
 
-let URI = process.env.MongoDB_URI;
+let URI = process.env.MONGODB_URI;
 const promise = mongoose.connect(URI);
 
 promise
