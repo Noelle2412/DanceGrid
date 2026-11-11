@@ -11,7 +11,8 @@ import passport from "./config/passport.js";
 
 const app = express();
 app.use(express.json());
-app.use(cors({ origin: "http://localhost:8080", credentials: true }));
+const ORIGIN = process.env.ORIGIN;
+app.use(cors({ origin: ORIGIN, credentials: true }));
 app.use(cookieParser());
 app.use(express.urlencoded());
 
