@@ -8,6 +8,7 @@ export type DancerShape =
 export type Role = "leader" | "follower";
 
 export interface Dancer {
+  name: string;
   shape: DancerShape;
   /** HEX value, e.g. "#ff8800" */
   color: string;

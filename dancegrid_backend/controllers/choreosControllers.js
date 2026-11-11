@@ -1,6 +1,7 @@
 import ResponseError from "../utils/ResponseError.js";
 import { ChoreoModel } from "../models/Choreo.js";
 import { ownerOfChoreo, canAccessChoreo } from "../utils/ChoreoPermissions.js";
+import { getUserById } from "./usersControllers.js";
 
 export const getChoreoById = async (req, res, next) => {
   try {
@@ -120,6 +121,19 @@ export const removeAccessToChoreo = async (req, res, next) => {
     updatedChoreo.sharedWith.splice(index, 1);
     await updatedChoreo.save();
     res.status(200).json(updatedChoreo);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSharedUsers = async (req, res, next) => {
+  try {
+    const { id } = req.body;
+    const choreo = await ownerOfChoreo(req);
+    const sharedWithUsers = choreo.sharedWith.map(
+      async (u) => await getUserById(u).email,
+    );
+    return sharedWithUsers;
   } catch (error) {
     next(error);
   }

@@ -1,5 +1,10 @@
 import { create } from "zustand";
-import { getChoreo, createChoreo, updateChoreo } from "@/api/choreos";
+import {
+  getChoreo,
+  createChoreo,
+  updateChoreo,
+  getSharedUsers,
+} from "@/api/choreos";
 
 const defaultSettings = {
   name: "",
@@ -108,3 +113,8 @@ const useChoreoSettings = create((set, get) => ({
 }));
 
 export default useChoreoSettings;
+
+export const getSharedWith = async (id) => {
+  const sharedWith = await getSharedUsers(id);
+  return sharedWith;
+};

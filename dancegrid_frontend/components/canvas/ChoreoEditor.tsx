@@ -5,6 +5,7 @@ import ChoreoSettings from "@/components/canvas/ChoreoSettings";
 import usePictures from "@/stores/usePictures";
 import PicturesOverview from "@/components/canvas/PicturesOverview";
 import Picture from "@/components/canvas/Picture";
+import ExportPdfButton from "../pdf/ExportPdfButton";
 
 export default function ChoreoEditor() {
   const params = useParams();
@@ -17,7 +18,9 @@ export default function ChoreoEditor() {
     fetchPictures,
     resetPictures,
   } = usePictures();
-  const [selectedPictureId, setSelectedPictureId] = useState<string | null>(null);
+  const [selectedPictureId, setSelectedPictureId] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     if (choreoId) {
@@ -49,6 +52,7 @@ export default function ChoreoEditor() {
             selectedPictureId={activePictureId}
             onSelectPicture={setSelectedPictureId}
           />
+          <ExportPdfButton />
           {activePictureId && <Picture pictureId={activePictureId} />}
         </>
       )}

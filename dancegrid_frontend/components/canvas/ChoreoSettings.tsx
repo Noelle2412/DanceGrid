@@ -14,6 +14,7 @@ const ChoreoSettings = () => {
   const choreoId = params?.id as string | undefined;
 
   const [cookies] = useCookies(["user"]);
+  const user = cookies.user;
 
   const {
     settings,
@@ -39,7 +40,6 @@ const ChoreoSettings = () => {
   }, [choreoId, fetchChoreoSettings, resetSettings]);
 
   const handleSave = async () => {
-    const user = cookies.user;
     const userId = user?.id;
 
     try {
@@ -125,14 +125,40 @@ const ChoreoSettings = () => {
       <div>
         <CoupleSettings />
       </div>
-      <div>
-        <button
-          className="w-20 bg-secondary text-white rounded-md p-2 cursor-pointer disabled:opacity-50 hover:opacity-90 transition-opacity"
-          disabled={isSaving}
-          onClick={handleSave}>
-          {isSaving ? "Saving..." : "Save"}
-        </button>
-      </div>
+      {Boolean(user) ? (
+        <div className="flex flex-col gap-4">
+          <button
+            className="w-20 bg-secondary text-white rounded-md p-2 cursor-pointer disabled:opacity-50 hover:opacity-90 transition-opacity"
+            disabled={isSaving}
+            onClick={handleSave}>
+            {isSaving ? "Saving..." : "Save"}
+          </button>
+          <button
+            className="w-20 bg-secondary text-white rounded-md p-2 cursor-pointer disabled:opacity-50 hover:opacity-90 transition-opacity"
+            disabled={isSaving}
+            onClick={handleShare}>
+            {isSaving ? "Saving..." : "Share"}
+          </button>
+          <Input
+            className="w-32"
+            name="share_email"
+            type="text"
+            placeholder="Email or Username"
+            onBlur={(e) => {
+              const sharedEmail = e.target.value;
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                (e.target as HTMLInputElement).blur();
+              }
+            }}
+          />{" "}
+          <div>
+            <span className="font-semibold">Shared with:</span>
+            <ul>{}</ul>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };

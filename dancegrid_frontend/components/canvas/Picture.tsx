@@ -24,7 +24,8 @@ function Picture({ pictureId }: PictureProps) {
   // Both layers are shifted so that (0, 0) lies in the center of the stage.
   const origin = { x: stageWidth / 2, y: stageHeight / 2 };
 
-  const { pictures, updateCoordinate } = usePictures();
+  const { pictures, updateCoordinate, addPicture, deletePicture } =
+    usePictures();
   const { couples } = useDancers();
 
   const params = useParams();
@@ -53,10 +54,10 @@ function Picture({ pictureId }: PictureProps) {
   };
 
   const [cookies] = useCookies(["user"]);
+  const user = cookies.user;
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
-    const user = cookies.user;
     if (!user?.id) {
       alert("Please log in to save a choreography.");
       return;
@@ -71,8 +72,19 @@ function Picture({ pictureId }: PictureProps) {
       alert("Pictures saved successfully!");
     } catch (error: unknown) {
       console.error("Failed to save pictures:", error);
+      alert(error instanceof Error ? error.message : "Failed to save picture");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deletePicture(pictureId);
+    } catch (error: any) {
+      console.error("Failed to delete picture: ", error);
       alert(
-        error instanceof Error ? error.message : "Failed to save picture",
+        error instanceof Error ? error.message : "Failed to delete picture",
       );
     } finally {
       setIsSaving(false);
@@ -120,12 +132,22 @@ function Picture({ pictureId }: PictureProps) {
         </Layer>
       </Stage>
       <CoordinateEntry pictureId={pictureId} />
-      <button
-        className="w-20 bg-secondary text-white rounded-md p-2 cursor-pointer disabled:opacity-50 hover:opacity-90 transition-opacity"
-        disabled={isSaving}
-        onClick={handleSave}>
-        {isSaving ? "Saving..." : "Save Pictures"}
-      </button>
+      <div className="flex flex-col gap-4">
+        {Boolean(user) ? (
+          <button
+            className="bg-secondary text-white rounded-md p-2 cursor-pointer disabled:opacity-50 hover:opacity-90 transition-opacity"
+            disabled={isSaving}
+            onClick={handleSave}>
+            {isSaving ? "Saving..." : "Save Pictures"}
+          </button>
+        ) : null}
+        <button
+          className="bg-red-500 text-white rounded-md p-2 cursor-pointer disabled:opacity-50 hover:opacity-90 transition-opacity"
+          disabled={isSaving}
+          onClick={handleDelete}>
+          {isSaving ? "Saving..." : "Delete this Picture"}
+        </button>
+      </div>
     </div>
   );
 }

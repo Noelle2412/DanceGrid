@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import useDancers from "@/stores/useDancers";
+import useCouples from "@/stores/useCouples";
 import useChoreoSettings from "@/stores/useChoreoSettings";
 import usePictures from "@/stores/usePictures";
 import { Input } from "../ui/input";
@@ -14,7 +14,13 @@ interface CoordInputProps {
   onCommit: (val: number) => void;
 }
 
-function CoordInput({ value, min, max, placeholder, onCommit }: CoordInputProps) {
+function CoordInput({
+  value,
+  min,
+  max,
+  placeholder,
+  onCommit,
+}: CoordInputProps) {
   const [text, setText] = useState<string>(String(value ?? 0));
 
   // Sync internal text when the value in the store changes externally (e.g., dragged on canvas)
@@ -31,7 +37,11 @@ function CoordInput({ value, min, max, placeholder, onCommit }: CoordInputProps)
     const parsed = parseFloat(normalized);
 
     // Only update store if it's a valid complete number and not ending in a dangling dot/minus
-    if (!isNaN(parsed) && !normalized.endsWith(".") && !normalized.endsWith("-")) {
+    if (
+      !isNaN(parsed) &&
+      !normalized.endsWith(".") &&
+      !normalized.endsWith("-")
+    ) {
       const clamped = Math.min(max, Math.max(min, parsed));
       onCommit(clamped);
     }
@@ -72,15 +82,19 @@ interface CoordinateEntryProps {
 }
 
 const CoordinateEntry = ({ pictureId }: CoordinateEntryProps) => {
-  const { couples } = useDancers();
+  const { couples } = useCouples();
   const { settings } = useChoreoSettings();
   const { pictures, updateX, updateY } = usePictures();
 
   const currentPicture = pictures.find((p) => p.id === pictureId);
 
-  const getCoord = (coupleNumber: number, role: Role, axis: "x" | "y"): number => {
+  const getCoord = (
+    coupleNumber: number,
+    role: Role,
+    axis: "x" | "y",
+  ): number => {
     const found = currentPicture?.coordinates.find(
-      (c) => c.coupleNumber === coupleNumber && c.role === role
+      (c) => c.coupleNumber === coupleNumber && c.role === role,
     );
     return found ? found[axis] : 0;
   };
@@ -89,74 +103,85 @@ const CoordinateEntry = ({ pictureId }: CoordinateEntryProps) => {
   const halfHeight = settings.gridSize[1] / 2;
 
   return (
-    <ul className="flex flex-col gap-2">
-      <li className="flex justify-between items-center gap-2 font-semibold">
-        {settings.soloMode ? (
-          <span>Dancers</span>
-        ) : (
-          <div className="flex gap-16 pl-8">
-            <span>Leaders</span>
-            <span>Followers</span>
-          </div>
-        )}
-      </li>
-      {couples.map((couple: Couple) => {
-        const leaderX = getCoord(couple.number, "leader", "x");
-        const leaderY = getCoord(couple.number, "leader", "y");
-        const followerX = getCoord(couple.number, "follower", "x");
-        const followerY = getCoord(couple.number, "follower", "y");
+    <table>
+      <thead className="font-semibold">
+        <tr className="font-semibold py-2">
+          <td> </td>
+          {settings.soloMode ? (
+            <td>Dancers</td>
+          ) : (
+            <>
+              <td className="p-2">Leaders</td>
+              <td className="p-2">Followers</td>
+            </>
+          )}
+        </tr>
+      </thead>
+      <tbody>
+        {couples.map((couple: Couple) => {
+          const leaderX = getCoord(couple.number, "leader", "x");
+          const leaderY = getCoord(couple.number, "leader", "y");
+          const followerX = getCoord(couple.number, "follower", "x");
+          const followerY = getCoord(couple.number, "follower", "y");
 
-        return (
-          <li
-            key={`entry-${couple.number}`}
-            className="flex flex-row items-center gap-2">
-            <span className="w-6 font-medium">{String(couple.number)}:</span>
+          return (
+            <tr className="py-2" key={`entry-${couple.number}`}>
+              <td className="p-2">{String(couple.number)}:</td>
 
-            <span className="flex items-center gap-1">
-              (
-              <CoordInput
-                value={leaderX}
-                min={-halfWidth}
-                max={halfWidth}
-                placeholder="x"
-                onCommit={(val) => updateX(pictureId, couple.number, "leader", val)}
-              />
-              /
-              <CoordInput
-                value={leaderY}
-                min={-halfHeight}
-                max={halfHeight}
-                placeholder="y"
-                onCommit={(val) => updateY(pictureId, couple.number, "leader", val)}
-              />
-              )
-            </span>
-
-            {settings.soloMode ? null : (
-              <span className="flex items-center gap-1">
+              <td className="p-2">
                 (
                 <CoordInput
-                  value={followerX}
+                  value={leaderX}
                   min={-halfWidth}
                   max={halfWidth}
                   placeholder="x"
-                  onCommit={(val) => updateX(pictureId, couple.number, "follower", val)}
+                  onCommit={(val) =>
+                    updateX(pictureId, couple.number, "leader", val)
+                  }
                 />
                 /
                 <CoordInput
-                  value={followerY}
+                  value={leaderY}
                   min={-halfHeight}
                   max={halfHeight}
                   placeholder="y"
-                  onCommit={(val) => updateY(pictureId, couple.number, "follower", val)}
+                  onCommit={(val) =>
+                    updateY(pictureId, couple.number, "leader", val)
+                  }
                 />
                 )
-              </span>
-            )}
-          </li>
-        );
-      })}
-    </ul>
+              </td>
+
+              {settings.soloMode ? null : (
+                <td className="p-2">
+                  (
+                  <CoordInput
+                    value={followerX}
+                    min={-halfWidth}
+                    max={halfWidth}
+                    placeholder="x"
+                    onCommit={(val) =>
+                      updateX(pictureId, couple.number, "follower", val)
+                    }
+                  />
+                  /
+                  <CoordInput
+                    value={followerY}
+                    min={-halfHeight}
+                    max={halfHeight}
+                    placeholder="y"
+                    onCommit={(val) =>
+                      updateY(pictureId, couple.number, "follower", val)
+                    }
+                  />
+                  )
+                </td>
+              )}
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
   );
 };
 

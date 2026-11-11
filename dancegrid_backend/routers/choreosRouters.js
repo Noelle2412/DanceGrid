@@ -10,6 +10,7 @@ import {
   addSharedUser,
   removeSharedUser,
   removeAccessToChoreo,
+  getSharedUsers,
 } from "../controllers/choreosControllers.js";
 
 const router = Router();
@@ -25,6 +26,7 @@ router.patch("/:id/update_pictures", requireAuth, updatePictures);
 
 router.patch("/:id/add_shared_user", requireAuth, addSharedUser);
 router.patch("/:id/remove_shared_user", requireAuth, removeSharedUser);
+router.get("/:id/shared_users", requireAuth, getSharedUsers);
 
 router.patch("/:id/remove_access", requireAuth, removeAccessToChoreo);
 

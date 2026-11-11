@@ -24,6 +24,10 @@ export async function updatePictures(id, body) {
   const { data } = await client.patch(`/choreos/${id}/update_pictures`, body);
   return data;
 }
+export async function getSharedUsers(id) {
+  const { data } = await client.get(`/choreos/${id}/shared_users`);
+  return data;
+}
 export async function addSharedUser(id, body) {
   const { data } = await client.patch(`/choreos/${id}/add_shared_user`, body);
   return data;

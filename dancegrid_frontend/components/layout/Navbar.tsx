@@ -57,6 +57,7 @@ const Navbar = () => {
           </>
         )}
       </nav>
+      {isLoggedIn ? <p>Logged in as {user.email}</p> : null}
       <button
         className="bg-secondary text-white p-2 rounded-lg cursor-pointer"
         onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}>
