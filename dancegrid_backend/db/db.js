@@ -10,7 +10,7 @@ promise
     console.log("Initialized connection to Database");
   })
   .catch((error) => {
-    console.log("Connection with ToDos Database failed");
+    console.log("Connection with DanceGrid Database failed");
     console.log(error);
   });
 
