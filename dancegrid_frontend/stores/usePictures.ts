@@ -18,7 +18,6 @@ interface PicturesState {
   beginLoad: (id: string) => void;
   hydrate: (choreo: { pictures?: Picture[] } | null | undefined) => void;
   failLoad: (message: string) => void;
-
   // Local edits (never touch the backend).
   addPicture: (coordinates: DancerPosition[]) => string;
   updateCoordinate: (id: string, coordinate: DancerPosition) => void;
@@ -28,7 +27,8 @@ interface PicturesState {
   updateTitle: (id: string, title: string) => void;
   reorderPicture: (id: string, previd: string, nextid: string) => void;
   deletePicture: (id: string) => void;
-
+  renumberCouple: (from: number, to: number) => void;
+  removeCouple: (number: number) => void;
   // Saves all pictures at once. Resolves to true on success.
   savePictures: () => Promise<boolean>;
 }
@@ -174,6 +174,35 @@ const usePictures = create<PicturesState>()((set, get) => ({
       ),
     ),
 
+  renumberCouple: (from: number, to: number) => {
+    if (from === to) return;
+    set((state) =>
+      edited(
+        state,
+        state.pictures.map((p) => ({
+          ...p,
+          coordinates: p.coordinates
+            // drop stale positions already stored under the target number
+            .filter((c) => c.coupleNumber !== to)
+            .map((c) =>
+              c.coupleNumber === from ? { ...c, coupleNumber: to } : c,
+            ),
+        })),
+      ),
+    );
+  },
+
+  removeCouple: (number: any) =>
+    set((state) =>
+      edited(
+        state,
+        state.pictures.map((p) => ({
+          ...p,
+          coordinates: p.coordinates.filter((c) => c.coupleNumber !== number),
+        })),
+      ),
+    ),
+
   // Saving. On failure the local state is kept, isDirty stays true and saveError is set.
   savePictures: async () => {
     const { choreoId, pictures } = get();
@@ -186,6 +215,7 @@ const usePictures = create<PicturesState>()((set, get) => ({
       await updatePictures(choreoId, { pictures });
       set((state) => ({
         isSaving: false,
+        isDirty: false,
       }));
       return true;
     } catch (err: any) {

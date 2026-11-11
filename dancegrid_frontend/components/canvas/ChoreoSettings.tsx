@@ -128,11 +128,8 @@ const ChoreoSettings = () => {
           </div>
         </Label>
       </div>
-      <div>
-        <CoupleSettings />
-      </div>
       {Boolean(user) ? (
-        <div className="flex flex-col gap-4">
+        <div className="w-32 flex flex-col gap-4">
           <button
             className="w-20 bg-secondary text-white rounded-md p-2 cursor-pointer disabled:opacity-50 hover:opacity-90 transition-opacity"
             disabled={isSaving}
@@ -185,6 +182,9 @@ const ChoreoSettings = () => {
           </div>
         </div>
       ) : null}
+      <div>
+        <CoupleSettings />
+      </div>
     </div>
   );
 };

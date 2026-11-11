@@ -142,7 +142,7 @@ const useCouples = create((set, get) => ({
       await updateCouples(choreoId, { couples });
       set((state) => ({
         isSaving: false,
-        isDirty: state.revision !== revision,
+        isDirty: false,
       }));
       return true;
     } catch (err) {

@@ -52,13 +52,10 @@ const useChoreoSettings = create((set, get) => ({
     }),
   failLoad: (message) => set({ error: message, isLoading: false }),
   hydrate: (choreo) => {
-    const grid = Array.isArray(choreo?.gridSize)
-      ? choreo.gridSize
-      : defaultSettings.gridSize;
     set({
       settings: {
         name: choreo?.name || "",
-        gridSize: [Number(grid[0]), Number(grid[1])],
+        gridSize: choreo?.gridSize || [16, 16],
         soloMode: choreo?.mode === "solo",
       },
       isLoading: false,
@@ -126,7 +123,7 @@ const useChoreoSettings = create((set, get) => ({
         await updateChoreo(choreoId, body);
         set((state) => ({
           isSaving: false,
-          isDirty: state.revision !== revision,
+          isDirty: false,
         }));
         return { ok: true, id: choreoId, created: false };
       }
@@ -142,7 +139,7 @@ const useChoreoSettings = create((set, get) => ({
         choreoId: newId,
         isLoaded: true,
         isSaving: false,
-        isDirty: state.revision !== revision,
+        isDirty: false,
       }));
       return { ok: true, id: newId, created: true };
     } catch (err) {

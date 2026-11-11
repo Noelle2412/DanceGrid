@@ -46,6 +46,22 @@ export async function loadChoreo(id: string, { force = false } = {}) {
   }
 }
 
+/**
+ * Renumbers a couple in the couples store AND in every picture, so the
+ * dancer keeps its positions. Throws (before changing anything) if the new
+ * number is invalid or already taken.
+ */
+export function renumberCouple(number: number, newNumber: number) {
+  useCouples.getState().updateCouple(number, newNumber); // validates first
+  usePictures.getState().renumberCouple(number, newNumber);
+}
+
+/** Deletes a couple and its positions in every picture. */
+export function deleteCouple(number: number) {
+  useCouples.getState().deleteCouple(number);
+  usePictures.getState().removeCouple(number);
+}
+
 /** Clears all three stores and cancels any load that is still in flight. */
 export function resetChoreo() {
   latestLoad += 1;

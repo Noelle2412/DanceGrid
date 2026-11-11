@@ -1,5 +1,6 @@
 "use client";
 import useCouples from "@/stores/useCouples";
+import { renumberCouple, deleteCouple } from "@/stores/choreoSession";
 import useChoreoSettings from "@/stores/useChoreoSettings";
 import { Input } from "../ui/input";
 import { ItemAppearancePicker } from "./Itemappearancepicker";
@@ -83,7 +84,7 @@ const CoupleSettings = () => {
                         return;
                       }
                       try {
-                        updateCouple(couple.number, newNum);
+                        renumberCouple(couple.number, newNum);
                       } catch (error: any) {
                         alert(error.message || error);
                         e.target.value = couple.number;

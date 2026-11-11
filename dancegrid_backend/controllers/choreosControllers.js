@@ -1,7 +1,7 @@
 import ResponseError from "../utils/ResponseError.js";
 import { ChoreoModel } from "../models/Choreo.js";
+import { UserModel } from "../models/User.js";
 import { ownerOfChoreo, canAccessChoreo } from "../utils/ChoreoPermissions.js";
-import { getUserById } from "./usersControllers.js";
 
 export const getChoreoById = async (req, res, next) => {
   try {
@@ -85,11 +85,12 @@ export const updatePictures = async (req, res, next) => {
 
 export const addSharedUser = async (req, res, next) => {
   try {
-    const { id } = req.body;
+    const { email } = req.body;
+    const user = await UserModel.findOne({ email: email.toLowerCase().trim() });
     const updatedChoreo = await ownerOfChoreo(req);
-    if (updatedChoreo.sharedWith.includes(id))
+    if (updatedChoreo.sharedWith.includes(user.id))
       throw new ResponseError("Choreo already shared with that user", 403);
-    updatedChoreo.sharedWith.push(id);
+    updatedChoreo.sharedWith.push(user.id);
     await updatedChoreo.save();
     res.status(200).json(updatedChoreo);
   } catch (error) {
@@ -99,9 +100,10 @@ export const addSharedUser = async (req, res, next) => {
 
 export const removeSharedUser = async (req, res, next) => {
   try {
-    const { id } = req.body;
+    const { email } = req.body;
+    const user = await UserModel.findOne({ email: email.toLowerCase().trim() });
     const updatedChoreo = await ownerOfChoreo(req);
-    const index = updatedChoreo.sharedWith.indexOf(id);
+    const index = updatedChoreo.sharedWith.indexOf(user.id);
     if (index === -1)
       throw new ResponseError("Choreo not shared with that user", 403);
     updatedChoreo.sharedWith.splice(index, 1);
@@ -128,12 +130,11 @@ export const removeAccessToChoreo = async (req, res, next) => {
 
 export const getSharedUsers = async (req, res, next) => {
   try {
-    const { id } = req.body;
     const choreo = await ownerOfChoreo(req);
-    const sharedWithUsers = choreo.sharedWith.map(
-      async (u) => await getUserById(u).email,
-    );
-    return sharedWithUsers;
+    const sharedWithUsers = await UserModel.find({
+      _id: { $in: choreo.sharedWith },
+    }).select("email");
+    res.status(200).json(sharedWithUsers.map((user) => user.email));
   } catch (error) {
     next(error);
   }

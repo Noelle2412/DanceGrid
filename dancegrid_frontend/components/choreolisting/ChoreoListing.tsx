@@ -35,8 +35,6 @@ const ChoreoListing = () => {
           getSharedWithChoreos(userId),
         ]);
 
-        console.log(myChoreos, sharedChoreos);
-
         setMyChoreos(myChoreos);
         setSharedChoreos(sharedChoreos);
       } catch (err: any) {
