@@ -56,7 +56,6 @@ export function DraggableItem({
 }: DraggableItemProps) {
   const { settings } = useChoreoSettings();
   const [widthMeters, heightMeters] = settings.gridSize;
-  const { pictures } = usePictures();
 
   /** Takes the node's current pixel position, returns the snapped + clamped position in meters. */
   const toSnappedMeters = (node: Konva.Node) => ({

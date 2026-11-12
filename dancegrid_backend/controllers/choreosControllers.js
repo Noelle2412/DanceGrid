@@ -14,10 +14,10 @@ export const getChoreoById = async (req, res, next) => {
 
 export const createChoreo = async (req, res, next) => {
   try {
-    const { name, owner, gridSize, mode } = req.body;
+    const { name, gridSize, mode } = req.body;
     const newChoreo = await ChoreoModel.create({
       name,
-      owner,
+      owner: req.user._id,
       gridSize,
       mode,
       dancers: [],
@@ -36,12 +36,16 @@ export const updateChoreo = async (req, res, next) => {
     const updatedChoreo = await canAccessChoreo(req);
     if (!name && !gridSize && !mode) {
       res.status(200).json(updatedChoreo);
+      return;
     }
-    await updatedChoreo.updateOne({
-      name,
-      gridSize,
-      mode,
-    });
+    await updatedChoreo.updateOne(
+      {
+        name,
+        gridSize,
+        mode,
+      },
+      { runValidators: true },
+    );
     res.status(200).json(updatedChoreo);
   } catch (error) {
     next(error);
@@ -51,6 +55,7 @@ export const updateChoreo = async (req, res, next) => {
 export const deleteChoreo = async (req, res, next) => {
   try {
     const deletedChoreo = await ownerOfChoreo(req);
+    await deletedChoreo.deleteOne();
     res.status(204).json(deletedChoreo);
   } catch (error) {
     next(error);
@@ -61,9 +66,12 @@ export const updateCouples = async (req, res, next) => {
   try {
     const { couples } = req.body;
     const updatedChoreo = await canAccessChoreo(req);
-    await updatedChoreo.updateOne({
-      couples,
-    });
+    await updatedChoreo.updateOne(
+      {
+        couples,
+      },
+      { runValidators: true },
+    );
     res.status(200).json(updatedChoreo);
   } catch (error) {
     next(error);
@@ -74,9 +82,12 @@ export const updatePictures = async (req, res, next) => {
   try {
     const { pictures } = req.body;
     const updatedChoreo = await canAccessChoreo(req);
-    await updatedChoreo.updateOne({
-      pictures,
-    });
+    await updatedChoreo.updateOne(
+      {
+        pictures,
+      },
+      { runValidators: true },
+    );
     res.status(200).json(updatedChoreo);
   } catch (error) {
     next(error);

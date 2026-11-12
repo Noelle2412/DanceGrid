@@ -75,23 +75,31 @@ const useChoreoSettings = create((set, get) => ({
       ...markEdited(state),
     })),
 
-  updateX: (x) =>
-    set((state) => ({
+  updateX: (x) => {
+    if (Number(x) <= 0 || typeof Number(x) === NaN) {
+      return;
+    }
+    return set((state) => ({
       settings: {
         ...state.settings,
         gridSize: [Number(x), state.settings.gridSize[1]],
       },
       ...markEdited(state),
-    })),
+    }));
+  },
 
-  updateY: (y) =>
-    set((state) => ({
+  updateY: (y) => {
+    if (Number(x) <= 0 || typeof Number(x) === NaN) {
+      return;
+    }
+    return set((state) => ({
       settings: {
         ...state.settings,
         gridSize: [state.settings.gridSize[0], Number(y)],
       },
       ...markEdited(state),
-    })),
+    }));
+  },
 
   updateMode: (soloMode) =>
     set((state) => ({
@@ -128,7 +136,7 @@ const useChoreoSettings = create((set, get) => ({
         return { ok: true, id: choreoId, created: false };
       }
 
-      const response = await createChoreo({ ...body, owner: userId });
+      const response = await createChoreo(body);
       const newId = response?._id;
       if (!newId) {
         throw new Error(

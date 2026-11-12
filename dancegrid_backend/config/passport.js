@@ -1,4 +1,6 @@
 import passport from "passport";
+import dotenv from "dotenv";
+dotenv.config();
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as JwtStrategy } from "passport-jwt";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
@@ -82,7 +84,7 @@ passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      clientSecret: process.env.GOOGLE_CLIENT_KEY,
       callbackURL: process.env.SERVER_URL + "/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {

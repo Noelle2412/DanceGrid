@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { requireAuth } from "../middlewares/requireAuth.js";
 import {
   getUsersChoreos,
   getUserById,
@@ -15,14 +16,14 @@ router.post("/register", registerUser);
 
 router.post("/login", loginUser);
 
-router.post("/:id/logout", logoutUser);
+router.post("/:id/logout", requireAuth, logoutUser);
 
-router.get("/:id/choreos", getUsersChoreos);
+router.get("/:id/choreos", requireAuth, getUsersChoreos);
 
-router.get("/:id/shared_choreos", getSharedWithChoreos);
+router.get("/:id/shared_choreos", requireAuth, getSharedWithChoreos);
 
-router.get("/:id", getUserById);
+router.get("/:id", requireAuth, getUserById);
 
-router.delete("/:id", deleteUser);
+router.delete("/:id", requireAuth, deleteUser);
 
 export default router;

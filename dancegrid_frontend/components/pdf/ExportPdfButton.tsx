@@ -37,6 +37,7 @@ export default function ExportPdfButton() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
+      alert("PDF Export failed");
       console.error("PDF export failed:", err);
     } finally {
       setBusy(false);

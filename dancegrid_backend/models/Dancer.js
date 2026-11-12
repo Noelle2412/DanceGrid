@@ -8,7 +8,7 @@ const DancerSchema = new Schema(
     },
     shape: {
       type: Schema.Types.String,
-      enum: ["circle", "square", "triangle"],
+      enum: ["circle", "square", "triangle", "diamond", "pentagon"],
       default: "circle",
     },
     name: {
@@ -24,7 +24,7 @@ export const CoupleSchema = new Schema(
     number: {
       type: Number,
       required: true,
-      min: 1,
+      min: 0,
       validate: Number.isInteger,
     },
     leader: {

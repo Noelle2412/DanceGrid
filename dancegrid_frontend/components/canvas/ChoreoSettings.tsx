@@ -8,6 +8,7 @@ import useChoreoSettings from "../../stores/useChoreoSettings";
 import useCouples from "../../stores/useCouples";
 import { saveSettingsAndCouples } from "../../stores/choreoSession";
 import CoupleSettings from "./CoupleSettings";
+import usePictures from "@/stores/usePictures";
 
 const ChoreoSettings = () => {
   const router = useRouter();
@@ -57,6 +58,9 @@ const ChoreoSettings = () => {
     const result = await saveSettingsAndCouples({ userId: user?.id });
     // A new choreography now has an id: move to its URL.
     if (!choreoId && result.status === "saved" && result.id) {
+      if (result.created) {
+        await usePictures.getState().savePictures();
+      }
       router.push(`/choreos/${result.id}`);
     }
   };
@@ -131,7 +135,7 @@ const ChoreoSettings = () => {
           <div className="w-32 flex flex-col gap-4">
             <button
               className="w-20 bg-secondary text-white rounded-md p-2 cursor-pointer disabled:opacity-50 hover:opacity-90 transition-opacity"
-              disabled={isSaving}
+              disabled={isSaving || isLoading || Boolean(saveError)}
               onClick={handleSave}>
               {isSaving ? "Saving..." : "Save Settings"}
             </button>
