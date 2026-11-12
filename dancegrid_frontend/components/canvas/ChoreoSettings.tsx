@@ -75,7 +75,7 @@ const ChoreoSettings = () => {
   }
 
   return (
-    <div className="flex flex-col md:flex-row justify-between gap-4">
+    <div className="flex flex-col lg:flex-row gap-4">
       <div className="flex flex-col gap-4">
         <h2 className="text-2xl">Choreography Settings</h2>{" "}
         <Input
@@ -127,61 +127,63 @@ const ChoreoSettings = () => {
             <span className="w-2/5 h-4/5 bg-secondary absolute rounded-full left-1 top-1 peer-checked:bg-bg peer-checked:left-11 transition-all duration-500" />
           </div>
         </Label>
-      </div>
-      {Boolean(user) ? (
-        <div className="w-32 flex flex-col gap-4">
-          <button
-            className="w-20 bg-secondary text-white rounded-md p-2 cursor-pointer disabled:opacity-50 hover:opacity-90 transition-opacity"
-            disabled={isSaving}
-            onClick={handleSave}>
-            {isSaving ? "Saving..." : "Save"}
-          </button>
-          {isDirty && !isSaving && (
-            <span className="text-sm text-amber-600">Unsaved changes</span>
-          )}
-          {saveError && (
-            <span className="text-sm text-red-500">{saveError}</span>
-          )}
-          <button
-            className="w-20 bg-secondary text-white rounded-md p-2 cursor-pointer disabled:opacity-50 hover:opacity-90 transition-opacity"
-            disabled={isSharing || !choreoId || !shareEmail.trim()}
-            onClick={handleShare}>
-            {isSharing ? "Sharing..." : "Share"}
-          </button>
-          <Input
-            className="w-32"
-            name="share_email"
-            type="text"
-            placeholder="Email or Username"
-            value={shareEmail}
-            onChange={(e) => setShareEmail(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                void handleShare();
-              }
-            }}
-          />{" "}
-          <div>
-            <span className="font-semibold">Shared with:</span>
-            <ul>
-              {sharedWith.map((entry: string) => (
-                <li key={entry} className="flex items-center gap-2">
-                  <span>{entry}</span>
-                  <button
-                    type="button"
-                    className="text-red-600 cursor-pointer"
-                    aria-label={`Stop sharing with ${entry}`}
-                    disabled={isSharing}
-                    onClick={() => void unshare(entry)}>
-                    ×
-                  </button>
-                </li>
-              ))}
-            </ul>
-            {shareError && <p className="text-sm text-red-500">{shareError}</p>}
+        {Boolean(user) ? (
+          <div className="w-32 flex flex-col gap-4">
+            <button
+              className="w-20 bg-secondary text-white rounded-md p-2 cursor-pointer disabled:opacity-50 hover:opacity-90 transition-opacity"
+              disabled={isSaving}
+              onClick={handleSave}>
+              {isSaving ? "Saving..." : "Save Settings"}
+            </button>
+            {isDirty && !isSaving && (
+              <span className="text-sm text-amber-600">Unsaved changes</span>
+            )}
+            {saveError && (
+              <span className="text-sm text-red-500">{saveError}</span>
+            )}
+            <button
+              className="w-20 bg-secondary text-white rounded-md p-2 cursor-pointer disabled:opacity-50 hover:opacity-90 transition-opacity"
+              disabled={isSharing || !choreoId || !shareEmail.trim()}
+              onClick={handleShare}>
+              {isSharing ? "Sharing..." : "Share"}
+            </button>
+            <Input
+              className="w-32"
+              name="share_email"
+              type="text"
+              placeholder="Email or Username"
+              value={shareEmail}
+              onChange={(e) => setShareEmail(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  void handleShare();
+                }
+              }}
+            />{" "}
+            <div>
+              <span className="font-semibold">Shared with:</span>
+              <ul>
+                {sharedWith.map((entry: string) => (
+                  <li key={entry} className="flex items-center gap-2">
+                    <span>{entry}</span>
+                    <button
+                      type="button"
+                      className="text-red-600 cursor-pointer"
+                      aria-label={`Stop sharing with ${entry}`}
+                      disabled={isSharing}
+                      onClick={() => void unshare(entry)}>
+                      ×
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              {shareError && (
+                <p className="text-sm text-red-500">{shareError}</p>
+              )}
+            </div>
           </div>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
       <div>
         <CoupleSettings />
       </div>

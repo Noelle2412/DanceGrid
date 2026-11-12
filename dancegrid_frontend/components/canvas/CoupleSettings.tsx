@@ -35,17 +35,17 @@ const CoupleSettings = () => {
         {settings.soloMode ? (
           <thead>
             <tr>
-              <td className="px-4 py-2"> </td>
-              <td className="text-lg px-4 py-2">Dancers</td>
+              <td className="px-2 py-2"> </td>
+              <td className="text-lg px-2 py-2 text-center">Dancers</td>
             </tr>
           </thead>
         ) : (
           <thead>
             <tr>
-              <td className="px-4 py-2"> </td>
-              <td className="text-lg px-4 py-2">Leaders</td>
+              <td className="px-2 py-2"> </td>
+              <td className="text-lg px-2 py-2 text-center">Leaders</td>
               <td></td>
-              <td className="text-lg px-4 py-2">Followers</td>
+              <td className="text-lg px-2 py-2 text-center">Followers</td>
               <td></td>
               <td></td>
             </tr>
@@ -63,9 +63,9 @@ const CoupleSettings = () => {
 
             return (
               <tr key={`couple-${couple.number}`}>
-                <td className="px-4 py-2">
+                <td className="px-2 py-2">
                   <Input
-                    className="w-16"
+                    className="w-8"
                     name="couple_number"
                     inputMode="numeric"
                     min={0}
@@ -97,9 +97,9 @@ const CoupleSettings = () => {
                     }}
                   />
                 </td>
-                <td className="px-4 py-2">
+                <td className="px-2 py-2">
                   <Input
-                    className="w-32"
+                    className="w-24"
                     name="leader_name"
                     type="text"
                     placeholder="Leader Name"
@@ -120,7 +120,7 @@ const CoupleSettings = () => {
                     }}
                   />{" "}
                 </td>
-                <td className="px-4 py-2">
+                <td className="px-2 py-2">
                   <ItemAppearancePicker
                     shape={leaderShape}
                     color={leaderColor}
@@ -130,9 +130,9 @@ const CoupleSettings = () => {
                   />
                 </td>
                 {settings.soloMode ? null : (
-                  <td className="px-4 py-2">
+                  <td className="px-2 py-2">
                     <Input
-                      className="w-32"
+                      className="w-24"
                       name="follower_name"
                       type="text"
                       placeholder="Follower Name"
@@ -155,7 +155,7 @@ const CoupleSettings = () => {
                   </td>
                 )}
                 {settings.soloMode ? null : (
-                  <td className="px-4 py-2">
+                  <td className="px-2 py-2">
                     <ItemAppearancePicker
                       shape={followerShape}
                       color={followerColor}
@@ -165,7 +165,7 @@ const CoupleSettings = () => {
                     />
                   </td>
                 )}
-                <td className="px-4 py-2">
+                <td className="px-2 py-2">
                   <button
                     className="bg-red-600 text-white rounded-md p-2 hover:bg-red-700 cursor-pointer"
                     onClick={() => deleteCouple(couple.number)}>

@@ -26,7 +26,7 @@ function polygonPoints(sides: number): string {
 export function ShapeIcon({
   shape,
   color,
-  size = 24,
+  size = 18,
 }: {
   shape: DancerShape;
   color: string;
@@ -153,8 +153,8 @@ const styles: Record<string, React.CSSProperties> = {
   shapeButton: {
     display: "grid",
     placeItems: "center",
-    width: 36,
-    height: 36,
+    width: 27,
+    height: 27,
     padding: 0,
     border: "1px solid #d0d4da",
     borderRadius: 6,

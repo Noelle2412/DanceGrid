@@ -59,7 +59,7 @@ function CoordInput({
 
   return (
     <Input
-      className="w-16 text-center"
+      className="w-12 text-center"
       type="text"
       inputMode="decimal"
       placeholder={placeholder}

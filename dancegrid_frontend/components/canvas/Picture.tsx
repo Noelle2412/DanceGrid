@@ -15,7 +15,7 @@ interface PictureProps {
 }
 
 function Picture({ pictureId }: PictureProps) {
-  const pixelsPerMeter = 50; // Value to test around with.
+  const pixelsPerMeter = 40; // Value to test around with.
   const { settings } = useChoreoSettings();
   const stageWidth = settings.gridSize[0] * pixelsPerMeter;
   const stageHeight = settings.gridSize[1] * pixelsPerMeter;
@@ -59,7 +59,7 @@ function Picture({ pictureId }: PictureProps) {
   };
 
   return (
-    <div className="flex flex-col md:flex-row justify-around items-start">
+    <div className="flex flex-col lg:flex-row justify-around items-start gap-8">
       <Stage width={stageWidth} height={stageHeight}>
         <Layer {...origin} listening={false}>
           <Grid pixelsPerMeter={pixelsPerMeter} />
@@ -98,8 +98,7 @@ function Picture({ pictureId }: PictureProps) {
           })}
         </Layer>
       </Stage>
-      <CoordinateEntry pictureId={pictureId} />
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 justify-center">
         {Boolean(user) ? (
           <>
             <button
@@ -117,10 +116,11 @@ function Picture({ pictureId }: PictureProps) {
           </>
         ) : null}
         <button
-          className="bg-red-500 text-white rounded-md p-2 cursor-pointer hover:opacity-90 transition-opacity"
+          className="w-48 bg-red-500 text-white rounded-md p-2 cursor-pointer hover:opacity-90 transition-opacity"
           onClick={() => deletePicture(pictureId)}>
           Delete this Picture
         </button>
+        <CoordinateEntry pictureId={pictureId} />
       </div>
     </div>
   );

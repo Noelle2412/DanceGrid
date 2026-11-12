@@ -52,11 +52,12 @@ export default function ChoreoEditor() {
         <p className="text-red-500">{error}</p>
       ) : (
         <>
+          {" "}
+          <ExportPdfButton />
           <PicturesOverview
             selectedPictureId={activePictureId}
             onSelectPicture={setSelectedPictureId}
           />
-          <ExportPdfButton />
           {activePictureId && <Picture pictureId={activePictureId} />}
         </>
       )}

@@ -42,7 +42,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class">
           <CookieProviderWrapper>
             <Navbar />
-            <main className="bg-bg p-4 grow">{children}</main>
+            <main className="min-w-fit bg-bg p-4 grow">{children}</main>
             <Footer />
           </CookieProviderWrapper>
         </ThemeProvider>

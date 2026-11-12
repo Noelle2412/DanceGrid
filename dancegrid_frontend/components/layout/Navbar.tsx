@@ -34,7 +34,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className="bg-accent text-white p-2 flex flex-row justify-between items-center">
+    <header className="bg-accent text-white p-2 flex flex-col lg:flex-row justify-between items-center">
       <span className="logo text-4xl">
         <Link href="/">DanceGrid</Link>
       </span>

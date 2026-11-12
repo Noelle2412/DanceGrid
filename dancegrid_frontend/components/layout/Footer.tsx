@@ -1,7 +1,7 @@
 import Link from "next/link";
 const Footer = () => {
   return (
-    <footer className="bg-accent text-white p-2 text-sm flex flex-row items-center justify-between relative bottom-0 w-full">
+    <footer className="bg-accent text-white p-2 text-sm flex flex-col md:flex-row items-center justify-between relative bottom-0 w-full">
       <p>Built and maintained by Aischa.</p>
       <p>
         Did something go wrong?
