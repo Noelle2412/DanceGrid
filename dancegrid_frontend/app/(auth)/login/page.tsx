@@ -5,7 +5,7 @@ const LoginPage = () => {
   return (
     <div>
       <LoginForm />
-      <GoogleSignin />
+      {/* <GoogleSignin /> */}
     </div>
   );
 };

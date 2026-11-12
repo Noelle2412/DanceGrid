@@ -5,7 +5,7 @@ const RegisterPage = () => {
   return (
     <div>
       <RegisterForm />
-      <GoogleSignin />
+      {/* <GoogleSignin /> */}
     </div>
   );
 };
