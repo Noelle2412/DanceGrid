@@ -94,7 +94,7 @@ const usePictures = create<PicturesState>()((set, get) => ({
         id,
         coordinates: coordinates || [],
         order,
-        title: "",
+        title: "Picture",
         comment: "",
       };
       return edited(state, [...state.pictures, newPic]);

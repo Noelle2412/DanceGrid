@@ -1,6 +1,5 @@
 import { Router } from "express";
 import {
-  getAllUsers,
   getUsersChoreos,
   getUserById,
   deleteUser,
@@ -11,8 +10,6 @@ import {
 } from "../controllers/usersControllers.js";
 
 const router = Router();
-
-router.get("/", getAllUsers);
 
 router.post("/register", registerUser);
 
