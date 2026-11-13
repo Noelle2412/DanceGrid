@@ -5,7 +5,7 @@ export const DancerPositionSchema = new Schema(
     coupleNumber: {
       type: Number,
       required: true,
-      min: 1,
+      min: 0,
       validate: Number.isInteger,
     },
     role: {
